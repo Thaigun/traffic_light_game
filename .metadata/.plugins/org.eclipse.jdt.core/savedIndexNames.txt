@@ -1,0 +1,20 @@
+INDEX VERSION 1.126+D:\Antti\Ohjelmoinnit\traffic_light\.metadata\.plugins\org.eclipse.jdt.core
+1646253337.index
+3624448275.index
+1299022128.index
+1995173708.index
+4041092966.index
+163172794.index
+1697886153.index
+305854171.index
+4108727661.index
+3974580528.index
+1911217189.index
+2906334461.index
+1498219845.index
+1115467115.index
+3065916431.index
+30765161.index
+4263021625.index
+3133528496.index
+4155206848.index

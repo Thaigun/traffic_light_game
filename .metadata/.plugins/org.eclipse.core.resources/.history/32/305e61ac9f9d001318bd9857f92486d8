@@ -1,0 +1,24 @@
+package trafficLogic
+
+class Car {
+  val length: Double = randomLength()
+  val width: Double = widthForLength()
+  val mass: Double = massForDimensions()
+
+  def randomLength(): Double = {
+    60.0 //Dummy value for now, will be random.
+  }
+
+  def widthForLength(): Double = {
+    20.0 //Dummy value for now, will be random.
+  }
+
+  def massForDimensions(): Double = {
+    1000 //Dummy value for now, will be random.
+  }
+
+  var direction: Double = 0
+  var speed: Double = 0
+  var acceleration: Double = 0
+  var accDirection: Double = 0
+}

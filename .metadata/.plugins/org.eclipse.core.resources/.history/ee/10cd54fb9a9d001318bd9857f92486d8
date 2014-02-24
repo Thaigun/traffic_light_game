@@ -1,0 +1,22 @@
+package mapLogic
+
+import java.io._
+import scala.io._
+
+class FileReader {
+  var file: File
+  var fileAsText = ""
+  
+  def setFile(newFile: File): Unit = {
+    file = newFile
+    setFile()
+  }
+  
+  def setFile() = {
+    
+  }
+  
+  def getNumberOfCars() = {
+    
+  }
+}

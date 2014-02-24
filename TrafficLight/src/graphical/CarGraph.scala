@@ -1,0 +1,5 @@
+package graphical
+
+class CarGraph {
+
+}

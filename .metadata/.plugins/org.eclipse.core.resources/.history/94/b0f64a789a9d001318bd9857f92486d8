@@ -1,0 +1,29 @@
+package mapLogic
+
+import trafficLogic._
+import java.io._
+import scala.io._
+
+class Game {
+  
+  /* We're using immutable Vector as variable instead of mutable fixed value, because it will remain the same once initialized
+   * Roads are added based on the file.
+   * The variable cars will be initialized based on the number of cars defined in the file.
+   * Same applies to the crossings.
+   */
+  var roads: Vector[Road] = Vector() 
+  var cars: Vector[Car] = Vector()
+  var cossings: Vector[Crossing] = Vector()
+  
+  var gameFile: File
+  
+  /*
+   * The gameFile is not passed to the fileReader as an argument, because we might want to re-init the game with the same map. In
+   * that case it is better to have the file saved in a different variable.
+   */
+  val fileReader = new FileReader()
+  def readFile() {
+    fileReader.setFile(gameFile)
+  }
+  
+}

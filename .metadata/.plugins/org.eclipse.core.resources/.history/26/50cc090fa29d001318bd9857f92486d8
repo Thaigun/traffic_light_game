@@ -1,0 +1,7 @@
+package trafficLogic
+
+import mapLogic._
+
+class Road(game: Game) {
+  
+}
