@@ -1,6 +1,7 @@
 package trafficLogic
 
 import mapLogic._
+import graphical._
 
 class Car(game: Game) {
   val length: Double = randomLength()
@@ -24,5 +25,6 @@ class Car(game: Game) {
   private var acceleration: Double = 0
   private var accDirection: Double = 0
   
+  val graphic = new CarGraph()
   
 }

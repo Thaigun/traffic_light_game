@@ -2,12 +2,6 @@ package trafficLogic
 
 import mapLogic._
 
-class Road(game: Game) {
-  
-  val previousRoad: Option[Road] = None
-  val nextRoad: Option[Road] = None
-  val lineLeft: Option[Road] = None
-  val lineRigth: Option[Road] = None
-  
+class Road(val game: Game, val id: String, numOfLanes: Int)(val startX:Int, val startY:Int)(val endX: Int, val endY: Int) {
   
 }

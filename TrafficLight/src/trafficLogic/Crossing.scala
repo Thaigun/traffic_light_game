@@ -1,7 +1,7 @@
 package trafficLogic
 
 class Crossing {
-  var roadsIn: Vector[Road] = Vector()
+  var roadsIn: Vector[Lane] = Vector()
   var combinations: Array[Char] = Array()
   
   
