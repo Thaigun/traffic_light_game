@@ -1,0 +1,22 @@
+package graphical
+
+import mapLogic._
+import scala.collection.mutable.Buffer
+import scala.swing._
+import java.awt.Color
+import scala.swing.event._
+import scala.swing.event.Key._
+import java.awt.geom.Line2D
+
+class GamePanel(game: Game) extends Panel {
+  this.requestFocusInWindow
+  val roads: Buffer[RoadGraph] = Buffer()
+  roads += new RoadGraph(200, 300)(800, 700)
+  
+  override def paintComponent(g:Graphics2D) = {
+    g.setColor(Color.LIGHT_GRAY)
+    for (road <- roads) {
+      g.draw(road.rotated.getBounds2D())
+    }
+  }
+}

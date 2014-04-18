@@ -15,6 +15,5 @@ INDEX VERSION 1.126+D:\Antti\Ohjelmoinnit\traffic_light\.metadata\.plugins\org.e
 1115467115.index
 3065916431.index
 30765161.index
-4263021625.index
 3133528496.index
 4155206848.index

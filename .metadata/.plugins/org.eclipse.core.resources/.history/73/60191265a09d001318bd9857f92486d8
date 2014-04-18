@@ -1,5 +1,0 @@
-package trafficLogic
-
-class CrossingRoad(game: Game) extends Road(game) {
-
-}

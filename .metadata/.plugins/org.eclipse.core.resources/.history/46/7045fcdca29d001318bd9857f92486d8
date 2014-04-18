@@ -1,9 +1,0 @@
-package trafficLogic
-
-import mapLogic._
-
-class CrossingRoad(game: Game) extends Road(game) {
-  
-  var isRedLight = false
-  
-}

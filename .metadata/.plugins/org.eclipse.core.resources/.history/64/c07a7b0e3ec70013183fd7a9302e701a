@@ -1,0 +1,14 @@
+package trafficLogic
+
+import mapLogic._
+import graphical._
+
+class Lane(game: Game)(startX:Int, startY:Int)(endX: Int, endY: Int) {
+  
+  val previousRoad: Option[Lane] = None
+  val nextRoad: Option[Lane] = None
+  val laneLeft: Option[Lane] = None
+  val laneRight: Option[Lane] = None
+  
+  val graphic = new RoadGraph(startX, startY)(endX, endY)
+}

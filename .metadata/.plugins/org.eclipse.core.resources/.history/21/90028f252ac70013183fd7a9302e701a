@@ -1,0 +1,26 @@
+package graphical
+
+import java.awt.geom.AffineTransform
+import java.awt.geom.Rectangle2D
+import java.awt.Shape
+import scala.swing._
+
+class RoadGraph() extends Shape {
+  val rect = new Rectangle2D.Float(300, 400, 100, 50)
+  val transform = new AffineTransform {
+    rotate(0.15)
+  }
+  val rotated = transform.createTransformedShape(rect)
+  def getGraph = rotated
+
+  def contains(x$1: java.awt.geom.Rectangle2D): Boolean = ???
+  def contains(x$1: Double, x$2: Double, x$3: Double, x$4: Double): Boolean = ???
+  def contains(x$1: java.awt.geom.Point2D): Boolean = ???
+  def contains(x$1: Double, x$2: Double): Boolean = ???
+  def getBounds(): java.awt.Rectangle = ???
+  def getBounds2D(): java.awt.geom.Rectangle2D = ???
+  def getPathIterator(x$1: java.awt.geom.AffineTransform, x$2: Double): java.awt.geom.PathIterator = ???
+  def getPathIterator(x$1: java.awt.geom.AffineTransform): java.awt.geom.PathIterator = ???
+  def intersects(x$1: java.awt.geom.Rectangle2D): Boolean = ???
+  def intersects(x$1: Double, x$2: Double, x$3: Double, x$4: Double): Boolean = ???
+}

@@ -1,0 +1,18 @@
+package graphical
+
+import mapLogic._
+import scala.swing._
+import java.awt.Color
+import scala.swing.event._
+import scala.swing.event.Key._
+import java.awt.geom.Line2D
+
+class GamePanel(game: Game) extends Panel {
+  this.requestFocusInWindow
+  
+  override def paintComponent(g:Graphics2D) = {
+    val road = new RoadGraph
+    g.draw(road.getGraph)
+    g.drawString("kokeilu", 100, 100)
+  }
+}

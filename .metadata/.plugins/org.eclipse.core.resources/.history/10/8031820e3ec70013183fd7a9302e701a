@@ -1,0 +1,7 @@
+package trafficLogic
+
+import mapLogic._
+
+class Road(game: Game, val id: String)(startX:Int, startY:Int)(endX: Int, endY: Int) {
+
+}
