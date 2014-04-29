@@ -14,9 +14,14 @@ class GamePanel(game: Game) extends Panel {
   val cars: Array[CarGraph] = game.cars.map(_.graphic)
   
   override def paintComponent(g:Graphics2D) = {
-    g.setColor(Color.LIGHT_GRAY)
+    
     for (road <- roads) {
-      g.fill(road.shape)
+      g.setColor(Constants.roadColor)
+      g.fill(road.outline)
+      g.fill(road.sector)
+      g.setColor(Constants.trafLineColor)
+      road.trafLines.foreach(g.draw(_))
+      if (road.road.hasPrevious) road.sectorLines.foreach(g.draw(_))
     }
   }
 }

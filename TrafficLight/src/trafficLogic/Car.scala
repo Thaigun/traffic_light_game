@@ -25,6 +25,6 @@ class Car(game: Game) {
   private var acceleration: Double = 0
   private var accDirection: Double = 0
   
-  val graphic = new CarGraph()
+  val graphic = new CarGraph(this)
   
 }

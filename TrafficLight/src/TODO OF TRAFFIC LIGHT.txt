@@ -1,5 +1,2 @@
 TODO OF TRAFFIC LIGHT
-- Lanes belong to Roads, but do we draw either RoadGraphs or LaneGraphs?
-- Does the road have to know the next or previous road or is this only for the lanes
-  or vice versa?
-- 
+-

@@ -1,5 +1,7 @@
 package graphical
 
-class CarGraph {
+import trafficLogic._
+
+class CarGraph(car: Car) {
 
 }
