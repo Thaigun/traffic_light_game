@@ -21,7 +21,7 @@ class GamePanel(game: Game) extends Panel {
       g.fill(road.sector)
       g.setColor(Constants.trafLineColor)
       road.trafLines.foreach(g.draw(_))
-      if (road.road.hasPrevious) road.sectorLines.foreach(g.draw(_))
+      if (road.road.hasPrevRoad) road.sectorLines.foreach(g.draw(_))
     }
   }
 }

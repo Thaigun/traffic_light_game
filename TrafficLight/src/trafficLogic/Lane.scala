@@ -22,6 +22,8 @@ class Lane(road: Road, laneNumber: Int) {
   def endM = new Point2D.Double((endL.x+endR.x)/2, (endL.y+endR.y)/2)
   def endL = new Point2D.Double(road.x2 + xOffset(laneNumber), road.y2 + yOffset(laneNumber))
   
+  def getRoad = road
+  
   // Can be used to count an offset of some point for an amount of "road-widths" (n) given. Depends on roadWidth and the angle of the parent road. 
   def xOffset(n: Int) = -n * sin(road.rotation) * Constants.laneWidth
   def yOffset(n: Int) = n * cos(road.rotation) * Constants.laneWidth

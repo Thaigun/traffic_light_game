@@ -6,7 +6,7 @@ ROA0003,2,1200.500,1200.200, 0002,0004
 ROA0004,2, 1200.120, 400.220, 0003,-
 
 #CROSSINGS: id, location of the center
-CRO11,800.800
+#CRO11,800.800
 
 #CONNECTING LANES (in crossings): id, id of the crossing, incoming road.lane, outgoing road.lane, when available
-CON111, 11, 0001,0002,A,* #One 
+#CON111, 11, 0001,0002,A,* #One 

@@ -17,7 +17,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
    */
   def start: Point2D.Double = {
     val touchingCorner = touchCorner.getOrElse(return new Point2D.Double(startX, startY))
-    if (touchingCorner equals previousRoad.get.left.endL) {
+    if (leftIsTouching) {
       touchingCorner
     } else {
       //Calculate the direction of this road knowing the right starting corner and the left ending corner.
@@ -32,10 +32,12 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
   }
 
   def end: Point2D.Double = {
-    new Point2D.Double(x2, y2)
+      new Point2D.Double(x2, y2)
   }
 
   lazy val lanes = Array.tabulate(numOfLanes)((n: Int) => new Lane(this, n))
+  var previousCrossing: Option[CrossingLane] = None
+  var nextCrossing: Option[CrossingLane] = None
   var previousRoad: Option[Road] = None
   var nextRoad: Option[Road] = None
   lazy val x1 = start.getX()
@@ -44,17 +46,17 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
 
   def rotation = Constants.angle(start, end)
   def length = start distance end
-  def hasNext = nextRoad.isDefined
-  def hasPrevious = previousRoad.isDefined
+  def hasNextCross = nextCrossing.isDefined
+  def hasPrevCross = previousCrossing.isDefined
+  def hasNextRoad = nextRoad.isDefined
+  def hasPrevRoad = previousRoad.isDefined
   var rightIsTouching: Boolean = false
   var leftIsTouching: Boolean = false
-  //This makes sure that rightIsTouching and leftIsTouching are having correct values 
-  touchCorner
   
   def touchCorner: Option[Point2D.Double] = {
-    if (!hasPrevious) {
+    if (!hasPrevRoad && !hasPrevCross) {
       None
-    } else {
+    } else if (!hasPrevCross) {
       //The left corner is to be the base case.
       var touching = previousRoad.get.left.endL
       val rot = Constants.angle(touching, end)
@@ -67,6 +69,9 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
         rightIsTouching = true
         Some(previousRoad.get.right.endR)
       }
+    } else {
+      //When the previous road is a crossing
+      Some(previousRoad.get.right.endR)
     }
   }
 }

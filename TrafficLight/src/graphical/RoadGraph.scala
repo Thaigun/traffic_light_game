@@ -31,7 +31,7 @@ class RoadGraph(val road: Road) {
   val sector = new Arc2D.Double()
   val sectorLines: Array[Arc2D] = Array.ofDim(road.numOfLanes - 1)
 
-  if (road.hasPrevious) {
+  if (road.hasPrevRoad) {
     //The starting angle of the sector to be drawn
     val startAng = if (road.rightIsTouching) {
       toDegrees(-Constants.angle(road.right.startR, road.left.startL))
