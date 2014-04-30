@@ -9,7 +9,7 @@ import java.awt.geom.Point2D
  @param road: The road that this lane belongs to
  @param laneNumber: The number of this lane in corresponding road, counted from left.
  */
-class Lane(road: Road, laneNumber: Int) {
+class Lane(road: Road, val laneNumber: Int) {
   lazy val previousLane: Option[Lane] = if (road.previousRoad.isDefined) road.previousRoad.get(laneNumber) else None
   lazy val nextLane: Option[Lane] = if (road.nextRoad.isDefined) road.nextRoad.get(laneNumber) else None
   lazy val laneLeft: Option[Lane] = road(laneNumber - 1)

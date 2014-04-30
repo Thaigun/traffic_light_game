@@ -36,7 +36,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
       if(!hasNextCross) {
         new Point2D.Double(x2, y2)
       } else {
-        new Point2D.Double(x2, y2)
+        nextCrossing.get.getEndingPointFor(this)
       }
   }
 

@@ -70,6 +70,32 @@ class RoadGraph(val road: Road) {
       sectorLines(i) = new Arc2D.Double() {
         setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * (i + 1), startAng, angExt, 0)
       }
-    }    
+    }
+  }
+
+  val endSect = new Arc2D.Double()
+  val endSectLines: Array[Arc2D] = Array.ofDim(road.numOfLanes - 1)
+  if (road.hasNextCross) {
+    //The starting angle of the sector to be drawn
+    val startAng = if (!road.nextCrossing.get.rightEndIsTouching(road)) {
+      toDegrees(-Constants.angle(road.right.startR, road.left.startL))
+    } else {
+      toDegrees(-Constants.angle(road.left.startL, road.right.startR))
+    }
+    //The width of the sector
+    val angExt = if (!road.nextCrossing.get.rightEndIsTouching(road)) {
+      toDegrees(-road.previousCrossing.get.getSide(road).get.angRightToLeft) - startAng
+    } else {
+      toDegrees(-road.nextCrossing.get.getSide(road).get.angLeftToRight) - startAng
+    }
+    sector.setArcByCenter(road.nextCrossing.get.getTouchingPointFor(road).getX(), road.nextCrossing.get.getTouchingPointFor(road).getY(), 
+        Constants.laneWidth * road.numOfLanes, startAng, angExt, 2)
+
+    for (i <- sectorLines.indices) {
+      sectorLines(i) = new Arc2D.Double() {
+        setArcByCenter(road.nextCrossing.get.getTouchingPointFor(road).getX(), road.nextCrossing.get.getTouchingPointFor(road).getY(), 
+            Constants.laneWidth * (i + 1), startAng, angExt, 0)
+      }
+    }
   }
 }

@@ -87,7 +87,7 @@ class FileReader(game: Game) {
       } else if (prevId.length() == 2) {
         val prevCr = findCrossingFor(prevId)
         road.previousCrossing = Some(prevCr)
-        prevCr addRoad road
+        prevCr addRoadOut road
       }
 
       if (nextId.length() == 4) {
@@ -95,7 +95,7 @@ class FileReader(game: Game) {
       } else if (nextId.length() == 2) {
         val nextCr = findCrossingFor(nextId)
         road.nextCrossing = Some(nextCr)
-        nextCr addRoad road
+        nextCr addRoadIn road
       }
     }
     roads
