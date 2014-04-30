@@ -6,7 +6,6 @@ import graphical._
 import scala.math._
 
 class Road(val game: Game, val id: String, val numOfLanes: Int)(private val startX: Int, private val startY: Int)(val x2: Int, val y2: Int) {
-
   def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size >= n) Some(lanes(n)) else None
   def right: Lane = this(numOfLanes - 1).get
   def left: Lane = this(0).get
@@ -15,7 +14,8 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
    * If the previous road is defined and not a crossing, the starting coordinated depend on them, otherwise the are the same as
    * the ones given as constructor parameters.
    */
-  def start: Point2D.Double = {
+  lazy val start = findStart
+  def findStart: Point2D.Double = {
     val touchingCorner = touchCorner.getOrElse(return new Point2D.Double(startX, startY))
     if (leftIsTouching) {
       touchingCorner
@@ -31,21 +31,27 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
     }
   }
 
-  def end: Point2D.Double = {
-      new Point2D.Double(x2, y2)
+  lazy val end = findEnd
+  def findEnd: Point2D.Double = {
+      if(!hasNextCross) {
+        new Point2D.Double(x2, y2)
+      } else {
+        new Point2D.Double(x2, y2)
+      }
   }
 
   lazy val lanes = Array.tabulate(numOfLanes)((n: Int) => new Lane(this, n))
-  var previousCrossing: Option[CrossingLane] = None
-  var nextCrossing: Option[CrossingLane] = None
+  var previousCrossing: Option[Crossing] = None
+  var nextCrossing: Option[Crossing] = None
   var previousRoad: Option[Road] = None
   var nextRoad: Option[Road] = None
   lazy val x1 = start.getX()
   lazy val y1 = start.getY()
   lazy val graphic = new RoadGraph(this)
 
+  //We want to construct the starting point instead of just using start method to avoid computing it all over again.
   def rotation = Constants.angle(start, end)
-  def length = start distance end
+  def length = start distance end  
   def hasNextCross = nextCrossing.isDefined
   def hasPrevCross = previousCrossing.isDefined
   def hasNextRoad = nextRoad.isDefined
@@ -71,7 +77,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
       }
     } else {
       //When the previous road is a crossing
-      Some(previousRoad.get.right.endR)
+      Some(previousCrossing.get.getTouchingPointFor(this))
     }
   }
 }

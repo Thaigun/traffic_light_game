@@ -1,2 +1,4 @@
 TODO OF TRAFFIC LIGHT
--
+FileReader: Kun luetaan Road, tallennetaan samalla mahdollinen edellinen ja seuraava CrossingLane ja näiden molempien alku- ja päätepisteet.
+Risteys on neliön muotoinen ja siinä on 8 eri liittymiskohtaa. Oikea valitaan tien saapumissuunnan perusteella. Se ei riipu muista teistä, 
+liian monta tietä yrittää liittyä -> error  

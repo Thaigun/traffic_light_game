@@ -51,5 +51,25 @@ class RoadGraph(val road: Road) {
         setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * (i + 1), startAng, angExt, 0)
       }
     }
+  } else if (road.hasPrevCross) {
+    //The starting angle of the sector to be drawn
+    val startAng = if (road.rightIsTouching) {
+      toDegrees(-Constants.angle(road.right.startR, road.left.startL))
+    } else {
+      toDegrees(-Constants.angle(road.left.startL, road.right.startR))
+    }
+    //The width of the sector
+    val angExt = if (road.rightIsTouching) {
+      toDegrees(-road.previousCrossing.get.getSide(road).get.angRightToLeft) - startAng
+    } else {
+      toDegrees(-road.previousCrossing.get.getSide(road).get.angLeftToRight) - startAng
+    }
+    sector.setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * road.numOfLanes, startAng, angExt, 2)
+
+    for (i <- sectorLines.indices) {
+      sectorLines(i) = new Arc2D.Double() {
+        setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * (i + 1), startAng, angExt, 0)
+      }
+    }    
   }
 }

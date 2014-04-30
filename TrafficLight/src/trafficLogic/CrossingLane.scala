@@ -7,16 +7,18 @@ import java.awt.geom.Point2D
 
 
 /**
- * When FileReader initializes a road, there are cases when the previous or next road of the said new road is a CrossingLane.
- * In such case, the FileReader finds the CrossingLane and asks it where is its ending or starting point. CrossingLane asks the
- * hosting Crossing the same question: what are the coordinates for this road? The Crossing then maintains information of which
- * CrossingLanes and Roads start and end where in that Crossing. 
+ * @param id: An identifying string for this CrossingLane
+ * @param crossing: The host crossing that this lane belongs to
+ * @param green: An array of characters representing different combinations when this lane is enabled
+ * @param connection: A string that describes which road this lane connects to which other road.
  */
-class CrossingLane(game: Game, id: String, crossing: Crossing, green: Array[Char]) {
+class CrossingLane(val id: String, val crossing: Crossing, green: Array[Char], connection: String) {
   def isEnabled = green.contains(crossing.currentCombo)
   
-  def start: Point2D.Double = crossing.getStartingPointFor(id)
-  def end: Point2D.Double = crossing.getEndingPointFor(id)
+  lazy val start = findStart
+  def findStart: Point2D.Double = crossing.getConnectStartFor(this)
+  lazy val end = findEnd
+  def findEnd: Point2D.Double = crossing.getConnectEndFor(this)
   
   lazy val x1 = start.getX()
   lazy val y1 = start.getY()
@@ -33,11 +35,13 @@ class CrossingLane(game: Game, id: String, crossing: Crossing, green: Array[Char
   
   def startR = new Point2D.Double(x1 + xOffset, y1 + yOffset)
   def startL = new Point2D.Double(x1, y1)
+  def endL = end
+  def endR = new Point2D.Double(endL.getX()+xOffset, endL.getY()+yOffset)
+  
   def previousRoad = in.getRoad
   def nextRoad = out.getRoad
   var rightIsTouching = false
   var leftIsTouching = false
-  touchCorner
   
   def touchCorner: Point2D = {
     //The left corner is to be the base case.
@@ -61,6 +65,25 @@ class CrossingLane(game: Game, id: String, crossing: Crossing, green: Array[Char
     crossing.getEndingPointFor(road)
   }
   def getStartingPointFor(road: Road) = {
-    crossing.getStartingPointFor(road)
+    crossing.getTouchingPointFor(road)
+  }
+  
+  def parseConnection = {
+    val inS = connection.split("->")(0)
+    val outS = connection.split("->")(1)
+    val inId = inS.split('.')(0)
+    val inLaneS = inS.split('.')(1)
+    val outId = outS.split('.')(0)
+    val outLaneS = outS.split('.')(1)
+    
+    val inRoad = crossing.roadsIn.find(_.id == inId).getOrElse(throw new Exception("Something went wrong when trying to parse CrossingLane connection string"))
+    val inLane = inRoad(inLaneS.toInt).getOrElse(throw new Exception("Something went wrong when trying to parse CrossingLane connection string"))
+    
+    val outRoad = crossing.roadsOut.find(_.id == outId).getOrElse(throw new Exception("Something went wrong when trying to parse CrossingLane connection string"))
+    val outLane = outRoad(outLaneS.toInt).getOrElse(throw new Exception("Something went wrong when trying to parse CrossingLane connection string"))
+    
+    this.in = inLane
+    this.out = outLane
+    
   }
 }

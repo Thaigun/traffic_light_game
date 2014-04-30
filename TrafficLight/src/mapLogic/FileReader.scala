@@ -24,18 +24,48 @@ class FileReader(game: Game) {
     if (file == null) throw new Exception("The game file must be defined first!")
     val fileReader = file.getLines
     while (fileReader.hasNext) {
-      val nextLine = fileReader.next.replaceAllLiterally(" ", "").takeWhile(_ != '#')
+      val nextLine = fileReader.next.replaceAllLiterally(" ", "").takeWhile(_ != '#').toLowerCase()
       if (!nextLine.isEmpty()) rowsInFile += nextLine
     }
 
   }
-
-  def getNumberOfCars(): Int = {
-    10 //Just a dummy value for now 
+  
+  def read = {
+    game.setCars(getNumberOfCars)
+    game.setCrossings(getCrossings)
+    game.setRoads(getRoads)
+    buildCrossings(game.crossings)
   }
 
-  def getRoads(): Array[Road] = {
-    val roadStrings = rowsInFile.filter(_.toLowerCase.startsWith("roa"))
+  private def getNumberOfCars(): Int = {
+    10 //Just a dummy value for now 
+  }
+  
+  
+  private def getCrossings(): Array[Crossing] = {
+    //Strings that define crossings
+    val crossStrings = rowsInFile.filter(_.toLowerCase.startsWith("cro"))
+    val crossings: Array[Crossing] = Array.ofDim(crossStrings.size)
+
+    for (i <- crossings.indices) {
+      //Add the crossing according to the string
+      val splitted = crossStrings(i).drop(3).split(',')
+      val location = new Point2D.Double(splitted(1).split('.')(0).toDouble, splitted(1).split('.')(1).toDouble)
+      crossings(i) = new Crossing(splitted(0), location, splitted(2).toCharArray())
+    }
+    
+    val crossLaneStrings = rowsInFile.filter(_.startsWith("con"))
+    for (i <- crossLaneStrings.indices) {
+      val splitted = crossLaneStrings(i).drop(3).split(',')
+      val crossing = crossings.find(_.id == splitted(1)).getOrElse(throw new Exception("Error in finding crossing "+splitted(1)))
+      val connection = splitted(2)
+      crossing.lanes += new CrossingLane(splitted(0), crossing, splitted(3).toCharArray(), connection)
+    }
+    crossings
+  }
+
+  private def getRoads(): Array[Road] = {
+    val roadStrings = rowsInFile.filter(_.startsWith("roa"))
     val roads: Array[Road] = Array.ofDim(roadStrings.size)
     // All roads are added to the 'roads' array
     for (i <- roads.indices) {
@@ -51,28 +81,34 @@ class FileReader(game: Game) {
       val stringOfRoad = roadStrings.find((s: String) => s.drop(3).startsWith(road.id))
       val prevId = stringOfRoad.getOrElse(throw new Exception("An error occured while reading the game file.")).split(',')(4)
       val nextId = stringOfRoad.getOrElse(throw new Exception("An error occured while reading the game file.")).split(',')(5)
+      //If the next 'road' is a crossing, it is added to the road and the road is added to the crossing.
       if (prevId.length() == 4) {
         road.previousRoad = roads.find(_.id == prevId)
       } else if (prevId.length() == 2) {
-        road.previousRoad
+        val prevCr = findCrossingFor(prevId)
+        road.previousCrossing = Some(prevCr)
+        prevCr addRoad road
       }
 
-      if (nextId != "-") road.nextRoad = roads.find(_.id == nextId)
+      if (nextId.length() == 4) {
+        road.nextRoad = roads.find(_.id == nextId)
+      } else if (nextId.length() == 2) {
+        val nextCr = findCrossingFor(nextId)
+        road.nextCrossing = Some(nextCr)
+        nextCr addRoad road
+      }
     }
-
     roads
   }
 
-  def getCrossings(): Array[Crossing] = {
-    val crossStrings = rowsInFile.filter(_.toLowerCase.startsWith("cro"))
-    val crossings: Array[Crossing] = Array.ofDim(crossStrings.size)
-
-    for (i <- crossings.indices) {
-      val splitted = crossStrings(i).drop(3).split(',')
-      val location = new Point2D.Double(splitted(1).split('.')(0).toDouble, splitted(1).split('.')(1).toDouble)
-      crossings(i) = new Crossing(splitted(0), location, splitted(2).toCharArray())
+  
+  private def findCrossingFor(id: String) = {
+    game.crossings.find(_.id == id).getOrElse(throw new Exception("Something went wrong when finding the crossing "+id+" for a Road."))
+  }
+  
+  private def buildCrossings(arr: Array[Crossing]) = {
+    for (cross <- arr) {
+      cross.build
     }
-
-    crossings
   }
 }

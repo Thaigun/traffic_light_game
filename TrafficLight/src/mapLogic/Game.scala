@@ -25,9 +25,7 @@ class Game {
     if (gameFile == null) throw new Exception("You must choose the game file first!")
     fileReader.setFile(gameFile)
     
-    setCars(fileReader.getNumberOfCars)
-    setRoads(fileReader.getRoads)
-    setCrossings(fileReader.getCrossings)
+    fileReader.read
     
     check
   }

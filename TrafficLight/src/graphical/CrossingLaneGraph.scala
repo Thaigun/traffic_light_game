@@ -23,7 +23,7 @@ class CrossingLaneGraph(lane: CrossingLane) {
    */
   private val sect = new Arc2D.Double()
 
-  def sector = {
+  def sector1 = {
     val startAng = if (lane.rightIsTouching) {
       toDegrees(-Constants.angle(lane.startR, lane.startL))
     } else {
@@ -38,6 +38,20 @@ class CrossingLaneGraph(lane: CrossingLane) {
     sect.setArcByCenter(lane.touchCorner.getX(), lane.touchCorner.getY(), Constants.laneWidth, startAng, angExt, 2)
 
     sect
+  }
+  
+  def sector2 = {
+    val startAng = if (lane.nextRoad.rightIsTouching) {
+      toDegrees(-Constants.angle(lane.nextRoad.left.startR, lane.nextRoad.left.startL))
+    } else {
+      toDegrees(-Constants.angle(lane.nextRoad.left.startL, lane.nextRoad.left.startR))
+    }
+    
+    val angExt = if (lane.rightIsTouching) {
+      toDegrees(-Constants.angle(lane.endR, lane.endL)) - startAng
+    } else {
+      toDegrees(-Constants.angle(lane.endL, lane.endR)) - startAng
+    }
   }
 
 }
