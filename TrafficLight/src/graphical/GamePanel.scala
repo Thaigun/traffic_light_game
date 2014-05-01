@@ -23,13 +23,18 @@ class GamePanel(game: Game) extends Panel {
       g.setColor(Constants.roadColor)
       g.fill(road.outline)
       g.fill(road.sector)
+      g.fill(road.endSect)
       g.setColor(Constants.trafLineColor)
       road.trafLines.foreach(g.draw(_))
-      if (road.road.hasPrevRoad) road.sectorLines.foreach(g.draw(_))
+      if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_)) 
+      if (road.road.hasPrevRoad || road.road.hasPrevCross) road.sectorLines.foreach(g.draw(_))
     }
     
-    g.setColor(Color.red)
+    
     for (crossing <- crossings) {
+      g.setColor(Constants.roadColor)
+      g.fill(crossing.outLine)
+      g.setColor(Constants.trafLineColor)
       g.draw(crossing.outLine)
     }
     
@@ -38,5 +43,7 @@ class GamePanel(game: Game) extends Panel {
       g.setColor(Color.GREEN)
       g.draw(lane.arrow)
     }
+//    import java.awt.geom.Rectangle2D
+//    g.draw(new Rectangle2D.Double(219,789, 2, 2))
   }
 }

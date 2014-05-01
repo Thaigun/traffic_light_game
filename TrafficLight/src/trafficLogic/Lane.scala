@@ -18,9 +18,9 @@ class Lane(road: Road, val laneNumber: Int) {
   def startR = new Point2D.Double(road.x1 + xOffset(laneNumber+1), road.y1 + yOffset(laneNumber+1))
   def startM = new Point2D.Double((startL.x+startR.x)/2, (startL.y+startR.y)/2)
   def startL = new Point2D.Double(road.x1 + xOffset(laneNumber), road.y1 + yOffset(laneNumber))
-  def endR = new Point2D.Double(road.x2 + xOffset(laneNumber+1), road.y2 + yOffset(laneNumber+1))
+  def endR = new Point2D.Double(road.end.getX() + xOffset(laneNumber+1), road.end.getY() + yOffset(laneNumber+1))
   def endM = new Point2D.Double((endL.x+endR.x)/2, (endL.y+endR.y)/2)
-  def endL = new Point2D.Double(road.x2 + xOffset(laneNumber), road.y2 + yOffset(laneNumber))
+  def endL = new Point2D.Double(road.end.getX() + xOffset(laneNumber), road.end.getY() + yOffset(laneNumber))
   
   def getRoad = road
   

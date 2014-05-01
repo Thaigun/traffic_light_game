@@ -1,2 +1,2 @@
 TODO OF TRAFFIC LIGHT
-Piirret‰‰n nelikulmion muotoinen risteys, CrossingLaneGraph on vain nuoli tiest‰ toiseen.
+Risteys-metodit toimimaan oikein, etenkin getEndingPointFor ja RoadGraphin loppusektorin piirt‰v‰ metodi sek‰ CrossingLane-nuolet kuntoon

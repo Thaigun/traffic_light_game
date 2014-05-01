@@ -5,7 +5,7 @@ import java.awt.geom.Point2D
 import graphical._
 import scala.math._
 
-class Road(val game: Game, val id: String, val numOfLanes: Int)(private val startX: Int, private val startY: Int)(val x2: Int, val y2: Int) {
+class Road(val game: Game, val id: String, val numOfLanes: Int)(private val startX: Int, private val startY: Int)(private val x2: Int, private val y2: Int) {
   def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size >= n) Some(lanes(n)) else None
   def right: Lane = this(numOfLanes - 1).get
   def left: Lane = this(0).get

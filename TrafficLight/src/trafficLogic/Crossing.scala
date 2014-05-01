@@ -140,7 +140,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     lanes.foreach(_.parseConnection)
   }
 
-  //Gets the touching point for a road, that is, the point where the road touches this crossing
+  //Gets the touching point for an outgoing road, that is, the point where the road touches this crossing
   def getTouchingPointFor(road: Road) = {
     val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
     val connect = side.getOutCoord
@@ -153,37 +153,46 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
       connect
     }
   }
+
+  def getTouchingEndPointFor(road: Road) = {
+    val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
+    if (rightEndIsTouching(road)) {
+      side.left
+    } else {
+      side.getInCoord
+    }
+  }
+
   //Gets the touching point for a CrossingLane
   def getConnectStartFor(crLane: CrossingLane) = {
     val side = getSide(crLane.in.getRoad).getOrElse(throw new Exception("Did not find the right side of a crossing."))
-    side.moveR(side.getInCoord, Constants.laneWidth * (crLane.in.laneNumber + 0.5))
+    side.moveR(side.getInCoord, -Constants.laneWidth * (crLane.in.laneNumber + 0.5))
   }
   //Gets the point where the roads left corner ends
   def getEndingPointFor(road: Road): Point2D.Double = {
     val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
     val rightCornerTouch = rightEndIsTouching(road)
-    if (road.id == "0005") println(side.side.toString+ "   " + rightCornerTouch)
     if (!rightCornerTouch) side.getInCoord
     else {
+      //      if (side.side == 'l') {
       val alfa = Constants.angle(road.start, side.left)
-      val theta = asin((Constants.laneWidth * road.numOfLanes) / (road.start distance side.right))
-      val sigma = -Pi / 2 + alfa + theta
-      val leftCorner = new Point2D.Double(side.left.getX - cos(sigma) * Constants.laneWidth * road.numOfLanes, side.left.getY + sin(sigma) * Constants.laneWidth * road.numOfLanes)
-      if (road.id == "0005") {
-        println("sides count: "+side.totalLanes)
-        println("side.right: "+side.right)
-        println("alfa: "+alfa)
-        println("theta: "+theta)
-        println("sigma: "+ sigma)
-        println(leftCorner)
-      }
+      val theta = acos((Constants.laneWidth * road.numOfLanes) / (road.start distance side.left))
+      val sigma = Pi / 2 - alfa - theta
+      val leftCorner = new Point2D.Double(side.left.getX - sin(sigma) * Constants.laneWidth * road.numOfLanes, side.left.getY - cos(sigma) * Constants.laneWidth * road.numOfLanes)
       leftCorner
+      //      } else if (side.side == 'r') {
+      //        
+      //      } else if (side.side == 'u') {
+      //
+      //      } else /*side.side=='d'*/ {
+      //
+      //      }
     }
   }
   //Gets the point where the CrossingLanes left corner ends
   def getConnectEndFor(crLane: CrossingLane) = {
     val side = getSide(crLane.out.getRoad).getOrElse(throw new Exception("Did not find the right side of a crossing."))
-    side.moveR(side.getOutCoord, -Constants.laneWidth * (crLane.in.laneNumber + 0.5))
+    side.moveR(side.getOutCoord, Constants.laneWidth * (crLane.in.laneNumber + 0.5))
   }
 
   def getSide(road: Road) = {
