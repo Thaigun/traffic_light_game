@@ -43,7 +43,8 @@ class GamePanel(game: Game) extends Panel {
       g.setColor(Color.GREEN)
       g.draw(lane.arrow)
     }
-//    import java.awt.geom.Rectangle2D
-//    g.draw(new Rectangle2D.Double(219,789, 2, 2))
+    import java.awt.geom.Rectangle2D
+    g.draw(new Rectangle2D.Double(600,390, 2, 2))
+    g.draw(new Rectangle2D.Double(630,360, 2, 2))
   }
 }

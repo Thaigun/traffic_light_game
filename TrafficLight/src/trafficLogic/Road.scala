@@ -5,7 +5,7 @@ import java.awt.geom.Point2D
 import graphical._
 import scala.math._
 
-class Road(val game: Game, val id: String, val numOfLanes: Int)(private val startX: Int, private val startY: Int)(private val x2: Int, private val y2: Int) {
+class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, startY: Int)(private val x2: Int, private val y2: Int) {
   def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size >= n) Some(lanes(n)) else None
   def right: Lane = this(numOfLanes - 1).get
   def left: Lane = this(0).get
@@ -62,7 +62,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
   def touchCorner: Option[Point2D.Double] = {
     if (!hasPrevRoad && !hasPrevCross) {
       None
-    } else if (!hasPrevCross) {
+    } else if (!hasPrevCross && !hasNextCross) {
       //The left corner is to be the base case.
       var touching = previousRoad.get.left.endL
       val rot = Constants.angle(touching, end)
@@ -75,6 +75,11 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
         rightIsTouching = true
         Some(previousRoad.get.right.endR)
       }
+    } else if (!hasPrevCross && hasNextCross) {
+      val leftTouches = (previousRoad.get.left.endL distance nextCrossing.get.location) <= (previousRoad.get.right.endR distance nextCrossing.get.location)
+      leftIsTouching = leftTouches
+      rightIsTouching = !leftTouches
+      if (leftTouches) Some(previousRoad.get.left.endL) else Some(previousRoad.get.right.endR)
     } else {
       //When the previous road is a crossing
       Some(previousCrossing.get.getTouchingPointFor(this))
@@ -89,4 +94,9 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
     if (numOfLanes % 2 == 0) apply(numOfLanes / 2).get.endL
     else apply(numOfLanes / 2).get.endM
   }
+  
+  
+  //TODO: Also if they are bigger than the map!
+  def startsFromEdge = !hasPrevRoad && !hasPrevCross && (startX <= 0 || startY <= 0) 
+  def endsToEdge = !hasNextRoad && !hasNextCross && (end.getX == 0 || end.getY == 0)
 }

@@ -1,12 +1,12 @@
 #ROADS: id, numOfLanes, startingPoint(irrelevant if there is a previous road), endingPoint, prev road, next road
 
-ROA0001,2,0.320,600.300, -,12
+ROA0001,2,-10.240,600.300, -,12
 ROA0002,3,600.300,1200.500, 12,0003
 ROA0003,2,1200.500,1200.200, 0002,0004
-ROA0004,2, 1200.120, 1700.220, 0003,-
+ROA0004,2, 1200.120, 1960.220, 0003,-
 
-ROA0005,2,0.850, 200.850, -,11
-ROA0006,2,300.850, 1000.680, 11,-
+ROA0005,2,-30.850, 200.850, -,11
+ROA0006,2,300.850, 1930.680, 11,-
 ROA0007,1, 250.850, 570.650, 11,-
 ROA0008,1,510.640, 230.100, 0007,12
 
@@ -16,7 +16,7 @@ CRO12,600.300, A
 
 #CONNECTING LANES (in crossings): id, id of the crossing, incoming road.lane, outgoing road.lane, when available
 CON111, 11, 0005.0->0006.0,A
-CON123, 11, 0005.1->0006.0,A
+CON123, 11, 0005.1->0006.1,A
 CON246, 11, 0005.0->0007.0, A
 
 CON000, 12, 0001.0->0002.0, A

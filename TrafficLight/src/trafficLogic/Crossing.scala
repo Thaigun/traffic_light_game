@@ -214,7 +214,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
   //Gets the point where the CrossingLanes end
   def getConnectEndFor(crLane: CrossingLane) = {
     val side = getSide(crLane.out.getRoad).getOrElse(throw new Exception("Did not find the right side of a crossing."))
-    side.moveR(side.getOutCoord, Constants.laneWidth * (crLane.in.laneNumber + 0.5))
+    side.moveR(side.getOutCoord, Constants.laneWidth * (crLane.out.laneNumber + 0.5))
   }
 
   def getSide(road: Road) = {
