@@ -33,40 +33,8 @@ class CrossingLane(val id: String, val crossing: Crossing, green: Array[Char], c
   def length = start distance end
   def rotation = Constants.angle(start, end)
   
-//  def startR = new Point2D.Double(x1 + xOffset, y1 + yOffset)
-//  def startL = new Point2D.Double(x1, y1)
-//  def endL = end
-//  def endR = new Point2D.Double(endL.getX()+xOffset, endL.getY()+yOffset)
-  
   def previousRoad = in.getRoad
   def nextRoad = out.getRoad
-//  var rightIsTouching = false
-//  var leftIsTouching = false
-  
-//  def touchCorner: Point2D = {
-//    //The left corner is to be the base case.
-//      var touching = previousRoad.left.endL
-//      val rot = Constants.angle(touching, end)
-//      //If the touching corner is the left corner of this road, that is the start point of this road
-//      val pr = previousRoad.rotation
-//      if ((pr > rot && (pr - Pi) < rot)||((rot > pr + Pi)&& rot < pr+2*Pi)) {
-//        leftIsTouching = true
-//        touching
-//      } else { //Otherwise the touching corner is the right corner and therefore we must calculate the position of the left corner.
-//        rightIsTouching = true
-//        previousRoad.right.endR
-//      }
-//  }
-  
-//  def xOffset = sin(rotation) * Constants.laneWidth
-//  def yOffset = cos(rotation) * Constants.laneWidth
-  
-//  def getEndingPointFor(road: Road) = {
-//    crossing.getEndingPointFor(road)
-//  }
-//  def getStartingPointFor(road: Road) = {
-//    crossing.getTouchingPointFor(road)
-//  }
   
   def parseConnection = {
     val inS = connection.split("->")(0)

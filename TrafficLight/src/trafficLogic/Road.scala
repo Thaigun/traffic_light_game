@@ -80,4 +80,13 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(private val star
       Some(previousCrossing.get.getTouchingPointFor(this))
     }
   }
+  
+  def startM = {
+    if (numOfLanes % 2 == 0) apply(numOfLanes / 2).get.startL
+    else apply(numOfLanes / 2).get.startM
+  }
+  def endM = {
+    if (numOfLanes % 2 == 0) apply(numOfLanes / 2).get.endL
+    else apply(numOfLanes / 2).get.endM
+  }
 }

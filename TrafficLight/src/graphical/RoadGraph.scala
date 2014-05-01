@@ -1,6 +1,7 @@
 package graphical
 
 import trafficLogic._
+import java.awt.geom.Point2D
 import java.awt.geom.Arc2D;
 import java.awt.geom.AffineTransform
 import java.awt.geom.Rectangle2D
@@ -32,18 +33,22 @@ class RoadGraph(val road: Road) {
   val sectorLines: Array[Arc2D] = Array.ofDim(road.numOfLanes - 1)
 
   if (road.hasPrevRoad) {
-    //The starting angle of the sector to be drawn
-    val startAng = if (road.rightIsTouching) {
-      toDegrees(-Constants.angle(road.right.startR, road.left.startL))
+    //Starting and ending angles of the sector
+    var startAng = 0.0
+    var endAng = 0.0
+    val prev = road.previousRoad.get
+    if (road.rightIsTouching) {
+      startAng = ang(road.right.startR, road.left.startL)
+      endAng = ang(prev.right.startR, prev.left.startL)
     } else {
-      toDegrees(-Constants.angle(road.left.startL, road.right.startR))
+      startAng = ang(prev.left.endL, prev.right.endR)
+      endAng = ang(road.left.startL, road.right.startR)
     }
-    //The width of the sector
-    val angExt = if (road.rightIsTouching) {
-      toDegrees(-Constants.angle(road.previousRoad.get.right.endR, road.previousRoad.get.left.endL)) - startAng
-    } else {
-      toDegrees(-Constants.angle(road.previousRoad.get.left.endL, road.previousRoad.get.right.endR)) - startAng
-    }
+    if (startAng < endAng) startAng += 2*Pi
+    startAng = toDegrees(-startAng)
+    endAng = toDegrees(-endAng)
+    val angExt = endAng - startAng
+    
     sector.setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * road.numOfLanes, startAng, angExt, 2)
 
     for (i <- sectorLines.indices) {
@@ -52,19 +57,21 @@ class RoadGraph(val road: Road) {
       }
     }
   } else if (road.hasPrevCross) {
-    //The starting angle of the sector to be drawn
-    val startAng = if (road.rightIsTouching) {
-      toDegrees(-road.previousCrossing.get.getSide(road).get.angRightToLeft)
-      
+    var startAng = 0.0
+    var endAng = 0.0
+    val prev = road.previousCrossing.get
+    if (road.rightIsTouching) {
+      startAng = ang(road.right.startR, road.left.startL)
+      endAng = prev.getSide(road).get.angRightToLeft
     } else {
-      toDegrees(-Constants.angle(road.left.startL, road.right.startR))
+      startAng = prev.getSide(road).get.angLeftToRight
+      endAng = ang(road.left.startL, road.right.startR)
     }
-    //The width of the sector
-    val angExt = if (road.rightIsTouching) {
-      toDegrees(-Constants.angle(road.right.startR, road.left.startL)) - startAng
-    } else {
-      toDegrees(-road.previousCrossing.get.getSide(road).get.angLeftToRight) - startAng
-    }
+    if (startAng < endAng) startAng += 2*Pi
+    startAng = toDegrees(-startAng)
+    endAng = toDegrees(-endAng)
+    val angExt = endAng - startAng   
+    
     sector.setArcByCenter(road.touchCorner.get.getX(), road.touchCorner.get.getY(), Constants.laneWidth * road.numOfLanes, startAng, angExt, 2)
 
     for (i <- sectorLines.indices) {
@@ -77,26 +84,30 @@ class RoadGraph(val road: Road) {
   val endSect = new Arc2D.Double()
   val endSectLines: Array[Arc2D] = Array.ofDim(road.numOfLanes - 1)
   if (road.hasNextCross) {
-    //The starting angle of the sector to be drawn
-    val startAng = if (!road.nextCrossing.get.rightEndIsTouching(road)) {
-      toDegrees(-Constants.angle(road.left.startL, road.right.startR))
+    var startAng = 0.0
+    var endAng = 0.0
+    val next = road.nextCrossing.get
+    if (next.rightEndIsTouching(road)) {
+      startAng = next.getSide(road).get.angLeftToRight
+      endAng = ang(road.right.endR, road.left.endL)
     } else {
-      toDegrees(-Constants.angle(road.right.startR, road.left.startL))
+      startAng = ang(road.left.endL, road.right.endR)
+      endAng = next.getSide(road).get.angRightToLeft
     }
-    //The width of the sector
-    val angExt = if (!road.nextCrossing.get.rightEndIsTouching(road)) {
-      toDegrees(-road.nextCrossing.get.getSide(road).get.angRightToLeft) - startAng
-    } else {
-      toDegrees(-road.nextCrossing.get.getSide(road).get.angLeftToRight) - startAng
-    }
-    endSect.setArcByCenter(road.nextCrossing.get.getTouchingEndPointFor(road).getX(), road.nextCrossing.get.getTouchingEndPointFor(road).getY(), 
+    if (startAng < endAng) startAng += 2*Pi
+    startAng = toDegrees(-startAng)
+    endAng = toDegrees(-endAng)
+    val angExt = endAng - startAng
+   
+    endSect.setArcByCenter(next.getTouchingEndPointFor(road).getX(), next.getTouchingEndPointFor(road).getY(), 
         Constants.laneWidth * road.numOfLanes, startAng, angExt, 2)
 
     for (i <- endSectLines.indices) {
       endSectLines(i) = new Arc2D.Double() {
-        setArcByCenter(road.nextCrossing.get.getTouchingEndPointFor(road).getX(), road.nextCrossing.get.getTouchingEndPointFor(road).getY(), 
+        setArcByCenter(next.getTouchingEndPointFor(road).getX(), next.getTouchingEndPointFor(road).getY(), 
             Constants.laneWidth * (i + 1), startAng, angExt, 0)
       }
     }
   }
+  def ang(p1: Point2D.Double, p2: Point2D.Double) = Constants.angle(p1, p2)
 }
