@@ -23,8 +23,13 @@ class Lane(road: Road, val laneNumber: Int) {
   def endL = new Point2D.Double(road.end.getX() + xOffset(laneNumber), road.end.getY() + yOffset(laneNumber))
   
   def getRoad = road
+  def isLeft = road.left == this
+  def isRight = road.right == this
   
   // Can be used to count an offset of some point for an amount of "road-widths" (n) given. Depends on roadWidth and the angle of the parent road. 
   def xOffset(n: Int) = -n * sin(road.rotation) * Constants.laneWidth
   def yOffset(n: Int) = n * cos(road.rotation) * Constants.laneWidth
+  
+  
+  def spaceFor(car: Car) = Double.PositiveInfinity
 }

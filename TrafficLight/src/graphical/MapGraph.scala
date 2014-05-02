@@ -11,13 +11,18 @@ object MapGraph extends SimpleSwingApplication {
   val game = new Game
   game.gameFile = Source.fromFile("src/gamefile.txt")
   game.readFile
+  val gamePanel = new GamePanel(game)
+  game.panel = gamePanel
   
   val gameWindow = new MainFrame() {
     title = "Traffic light challenge!"
     maximize()
-    val gamePanel = new GamePanel(game)
     contents = gamePanel
+    
   }
+  
+  val gameThread = new Thread(game)  
+  gameThread.start()
 
   def top() = this.gameWindow
 }

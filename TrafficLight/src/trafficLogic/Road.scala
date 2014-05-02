@@ -33,11 +33,11 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
 
   lazy val end = findEnd
   def findEnd: Point2D.Double = {
-      if(!hasNextCross) {
-        new Point2D.Double(x2, y2)
-      } else {
-        nextCrossing.get.getEndingPointFor(this)
-      }
+    if (!hasNextCross) {
+      new Point2D.Double(x2, y2)
+    } else {
+      nextCrossing.get.getEndingPointFor(this)
+    }
   }
 
   lazy val lanes = Array.tabulate(numOfLanes)((n: Int) => new Lane(this, n))
@@ -51,14 +51,14 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
 
   //We want to construct the starting point instead of just using start method to avoid computing it all over again.
   def rotation = Constants.angle(start, end)
-  def length = start distance end  
+  def length = start distance end
   def hasNextCross = nextCrossing.isDefined
   def hasPrevCross = previousCrossing.isDefined
   def hasNextRoad = nextRoad.isDefined
   def hasPrevRoad = previousRoad.isDefined
   var rightIsTouching: Boolean = false
   var leftIsTouching: Boolean = false
-  
+
   def touchCorner: Option[Point2D.Double] = {
     if (!hasPrevRoad && !hasPrevCross) {
       None
@@ -68,7 +68,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
       val rot = Constants.angle(touching, end)
       //If the touching corner is the left corner of this road, that is the start point of this road
       val pr = previousRoad.get.rotation
-      if ((pr > rot && (pr - Pi) < rot)||((rot > pr + Pi)&& rot < pr+2*Pi)) {
+      if ((pr > rot && (pr - Pi) < rot) || ((rot > pr + Pi) && rot < pr + 2 * Pi)) {
         leftIsTouching = true
         Some(touching)
       } else { //Otherwise the touching corner is the right corner and therefore we must calculate the position of the left corner.
@@ -85,7 +85,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
       Some(previousCrossing.get.getTouchingPointFor(this))
     }
   }
-  
+
   def startM = {
     if (numOfLanes % 2 == 0) apply(numOfLanes / 2).get.startL
     else apply(numOfLanes / 2).get.startM
@@ -94,9 +94,24 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     if (numOfLanes % 2 == 0) apply(numOfLanes / 2).get.endL
     else apply(numOfLanes / 2).get.endM
   }
-  
-  
+
+  def whichLaneFor(current: Lane, road: Road): Option[Lane] = {
+    if (!hasNextRoad && !hasNextCross) return None
+    if (hasNextRoad && nextRoad.get == road) {
+      if (this.numOfLanes <= road.numOfLanes) Some(current)
+      else {
+        if (current.isLeft) current.laneRight else current.laneLeft
+      }
+    } else if (hasNextRoad) {
+      None
+    } else {
+      val crossing = nextCrossing.getOrElse(throw new Exception("Cannot find a crossingLane because there's no next Crossing"))
+      val crossingLane = crossing.lanes.find(_.out.getRoad == road).getOrElse(throw new Exception("The desired road " + road.id + " is not accessible from this road: " + id))
+      this.lanes.find(_ == crossingLane.in)
+    }
+  }
+
   //TODO: Also if they are bigger than the map!
-  def startsFromEdge = !hasPrevRoad && !hasPrevCross && (startX <= 0 || startY <= 0) 
+  def startsFromEdge = !hasPrevRoad && !hasPrevCross && (startX <= 0 || startY <= 0)
   def endsToEdge = !hasNextRoad && !hasNextCross && (end.getX == 0 || end.getY == 0)
 }

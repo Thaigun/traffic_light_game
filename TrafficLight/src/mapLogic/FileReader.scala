@@ -31,16 +31,10 @@ class FileReader(game: Game) {
   }
   
   def read = {
-    game.setCars(getNumberOfCars)
     game.setCrossings(getCrossings)
     game.setRoads(getRoads)
     buildCrossings(game.crossings)
-  }
-
-  private def getNumberOfCars(): Int = {
-    10 //Just a dummy value for now 
-  }
-  
+  }  
   
   private def getCrossings(): Array[Crossing] = {
     //Strings that define crossings
