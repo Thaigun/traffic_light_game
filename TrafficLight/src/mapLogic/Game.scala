@@ -5,6 +5,7 @@ import graphical._
 import javax.swing.Timer
 import scala.io._
 import scala.collection.mutable.Buffer
+import java.awt.Shape
 
 class Game extends Runnable {
 
@@ -41,7 +42,15 @@ class Game extends Runnable {
   }
   
   def createCar = {
-    
+    cars += new Car(this)
+  }
+  
+  def allSpaceIn(area: Shape): Boolean = {
+    true
+  }
+  
+  def spaceIn(area: Shape): Double = {
+    ???
   }
 
   //Checks that the map is correctly builded and no conflicts are encountered.
@@ -55,11 +64,13 @@ class Game extends Runnable {
     var delta: Long = 0
     var time: Long = 0
     var lastCarCreated = System.currentTimeMillis()
+    //Remove:
+    createCar
 
     def gameRound = {
-      if (cars.size < Constants.carNumber && System.currentTimeMillis() - lastCarCreated > 1000) {
-        createCar
-      } else if (System.currentTimeMillis() - lastCarCreated > 20000) { createCar }
+//      if (cars.size < Constants.carNumber && System.currentTimeMillis() - lastCarCreated > 1000) {
+//        createCar
+//      } else if (System.currentTimeMillis() - lastCarCreated > 20000) { createCar }
       
       
       

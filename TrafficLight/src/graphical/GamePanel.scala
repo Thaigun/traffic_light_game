@@ -16,13 +16,13 @@ class GamePanel(game: Game) extends Panel {
   val crossings: Array[CrossingGraph] = game.crossings.map(_.graphic)
   val cl: Array[CrossingLane] = game.crossings.foldLeft(Array[CrossingLane]())((array, crossing) => array ++ crossing.lanes)
   val crossingLanes = cl.map(_.graphic)
-  
+
   this.background = Color.WHITE
-  
-  override def paintComponent(g:Graphics2D) = {
+
+  override def paintComponent(g: Graphics2D) = {
     g.setColor(Color.CYAN)
     g.setBackground(Color.PINK)
-    
+
     for (road <- roads) {
       g.setColor(Constants.roadColor)
       g.fill(road.outline)
@@ -30,37 +30,41 @@ class GamePanel(game: Game) extends Panel {
       g.fill(road.endSect)
       g.setColor(Constants.trafLineColor)
       road.trafLines.foreach(g.draw(_))
-      if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_)) 
+      if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_))
       if (road.road.hasPrevRoad || road.road.hasPrevCross) road.sectorLines.foreach(g.draw(_))
     }
-    
-    
+
     for (crossing <- crossings) {
       g.setColor(Constants.roadColor)
       g.fill(crossing.outLine)
       g.setColor(Constants.trafLineColor)
       g.draw(crossing.outLine)
     }
-    
+
     g.setColor(Color.GREEN)
     for (lane <- crossingLanes) {
       g.setColor(Color.GREEN)
       g.draw(lane.arrow)
     }
-    
+
     for (car <- cars) {
       g.setColor(car.color)
       g.fill(car.outline)
+      g.setColor(Color.green)
+      g.draw(car.car.scope)
+
+      import java.awt.geom.Rectangle2D
+      g.setColor(Color.red)
+      g.draw(new Rectangle2D.Double(car.car.frontLocation.getX(), car.car.frontLocation.getY(), 2, 2))
+      //    g.draw(new Rectangle2D.Double(630,360, 2, 2))
     }
-//    import java.awt.geom.Rectangle2D
-//    g.draw(new Rectangle2D.Double(600,390, 2, 2))
-//    g.draw(new Rectangle2D.Double(630,360, 2, 2))
+
   }
-  
+
   def run = {
     while (!game.over) {
       println("in the run method of game panel")
-      this.repaint 
-    }  
+      this.repaint
+    }
   }
 }

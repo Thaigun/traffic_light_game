@@ -20,9 +20,6 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     if (leftIsTouching) {
       touchingCorner
     } else {
-      //Calculate the direction of this road knowing the right starting corner and the left ending corner.
-      //Theta is the angle (horizontal be 0) of a line segment drawn from the left right start to the left end.
-      //Alfa is the angle between the line described above and the right side of the road. Alfa+theta is the total rotation sigma
       val theta = Constants.angle(touchingCorner, new Point2D.Double(x2, y2))
       val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance new Point2D.Double(x2, y2)))
       val sigma = theta + alfa
