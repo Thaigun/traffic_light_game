@@ -12,8 +12,9 @@ import java.awt.geom.Line2D
 
 class GamePanel(game: Game) extends Panel {
   this.requestFocusInWindow
+  this.preferredSize = new Dimension(game.size._1, game.size._2)
   val roads: Array[RoadGraph] = game.roads.map(_.graphic)
-  val cars: Buffer[CarGraph] = game.cars.map(_.graphic)
+  val cars: Buffer[Car] = game.cars
   val crossings: Array[CrossingGraph] = game.crossings.map(_.graphic)
   val cl: Array[CrossingLane] = game.crossings.foldLeft(Array[CrossingLane]())((array, crossing) => array ++ crossing.lanes)
   val crossingLanes = cl.map(_.graphic)
@@ -21,8 +22,10 @@ class GamePanel(game: Game) extends Panel {
   this.background = Color.WHITE
 
   override def paintComponent(g: Graphics2D) = {
+    val carGraphs = cars.map(_.graphic)
+    
     g.setBackground(Color.white)
-    g.clearRect(0, 0, 2000, 2000)
+    g.clearRect(0, 0, game.size._1, game.size._2)
 
     for (road <- roads) {
       g.setColor(Constants.roadColor)
@@ -33,6 +36,7 @@ class GamePanel(game: Game) extends Panel {
       road.trafLines.foreach(g.draw(_))
       if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_))
       if (road.road.hasPrevRoad || road.road.hasPrevCross) road.sectorLines.foreach(g.draw(_))
+
     }
 
     for (crossing <- crossings) {
@@ -48,23 +52,13 @@ class GamePanel(game: Game) extends Panel {
       g.draw(lane.arrow)
     }
 
-    for (car <- cars) {
+    for (car <- carGraphs) {
       g.setColor(car.color)
       g.fill(car.outline)
       g.setColor(Color.green)
       g.draw(car.car.scope)
-      g.drawString(car.car.speed.toString, 100,100)
-      g.setColor(Color.red)
-      g.draw(new Rectangle2D.Double(car.car.nextLeg.getX(), car.car.nextLeg.getY, 2, 2))
-      g.draw(new Line2D.Double(car.car.nextLeg, car.car.location))
     }
-    
+
   }
 
-  def run = {
-    while (!game.over) {
-      println("in the run method of game panel")
-      this.repaint
-    }
-  }
 }

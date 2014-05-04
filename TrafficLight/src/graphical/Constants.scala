@@ -8,14 +8,14 @@ object Constants {
    val laneWidth = 40
    val trafLineColor = Color.yellow
    val roadColor = Color.LIGHT_GRAY
-   val maxSpeed = 180
+   val maxSpeed = 100
    val crossWidth = 2 * laneWidth
    
    
    val preferredGap = 7
    
    /*From file*/
-   val carNumber = 10
+   val carNumber = 4
    val goal = 10
    /*--------*/
    

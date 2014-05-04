@@ -5,6 +5,8 @@ import graphical._
 import java.awt.geom.AffineTransform
 import java.awt.geom.Point2D
 import java.awt.geom.Rectangle2D
+import java.awt.geom.Area
+import java.awt.Shape
 import scala.math._
 
 class Car(game: Game) {
@@ -28,12 +30,7 @@ class Car(game: Game) {
      */
     def steerFor(other: SpeedVector, time: Double) = {
       val diff = other - this
-
-      //      val thisOffset = this.offsetAfter(1)
-      //      val otherOffset = other.offsetAfter(1)
-      //      val amount = (thisOffset distance otherOffset)
-      //      val direction = atan2(otherOffset.getY() - thisOffset.getY(), otherOffset.getX() - thisOffset.getX())
-      new AccelVector(diff.velocity, diff.direction)
+      new AccelVector(diff.velocity * 2, diff.direction)
     }
     def unary_- = new SpeedVector(velocity, direction - Pi)
 
@@ -87,7 +84,7 @@ class Car(game: Game) {
   def velocity = speed.velocity
   def acceleration = steering.acceleration
 
-  var location = new Point2D.Double(800, 200)
+  var location = new Point2D.Double(0, 0)
   //Location of the rear left corner
   def cornerLocation: Point2D.Double = {
     val controlPoint = new Point2D.Double(x - length / 2, y - width / 2)
@@ -101,7 +98,7 @@ class Car(game: Game) {
     val yCoord = cornerLocation.getY + length * sin(direction)
     new Point2D.Double(xCoord, yCoord)
   }
-  var speed = new SpeedVector(Constants.maxSpeed, -0.5)
+  var speed = new SpeedVector
   private var steering = new AccelVector
 
   def cornerX = cornerLocation.getX()
@@ -109,8 +106,8 @@ class Car(game: Game) {
   def x = location.getX()
   def y = location.getY()
 
-  private var currentCrossingLane: Option[CrossingLane] = None
-  private var currentLane: Option[Lane] = None
+  var currentCrossingLane: Option[CrossingLane] = None
+  var currentLane: Option[Lane] = None
   private var nextRoad: Option[Road] = None
 
   def hasCurrentLane = currentLane.isDefined
@@ -122,7 +119,9 @@ class Car(game: Game) {
 
   def setNextLeg(pt: Point2D.Double, t: Car.Steering) = { nextLeg = pt; steeringType = t }
 
-  def hasArrived = steeringType == Car.Arrive && (location distance nextLeg) < Constants.preferredGap
+  def hasArrived = steeringType == Car.Arrive && (location distance nextLeg) - length / 2 < Constants.preferredGap
+  
+//  def isInGoal = 
 
   def stoppingDistance(forVelocity: Double = velocity) = 0.5 * velocity * velocity / -break
 
@@ -130,7 +129,15 @@ class Car(game: Game) {
 
   //Current
   def road: Option[Road] = Some(currentLane.getOrElse(return None).getRoad)
-
+  
+  /*
+   * Has the car gone past some point. This is used to tell when to set the next leg.
+   */
+  def passedPoint(pt: Point2D.Double) = {
+    val slope = tan((direction + Pi/2) % (2*Pi)) //To the right hand side
+    val limitY = location.getY() + (pt.getX() - location.getX()) * slope
+    pt.getY() > limitY
+  }
   /**
    * The target lane on the current road, that is, which lane the car should take to get to the next desired road.
    */
@@ -145,10 +152,13 @@ class Car(game: Game) {
    * The area in front of this car, that needs to be clear in order to drive with full speed. It is a rectangle a little wider than the car itself
    * starting from the front of it and continuing until the breaking distance.
    */
+  protected def getScopeStart(wider: Double) = {
+    new Point2D.Double(frontLocation.getX() + sin(direction) * wider, frontLocation.getY() - cos(direction) * wider)
+  }
   def scope = {
     //How much the area is wider than the car
     val wider = width * 0.2
-    val startCorner = new Point2D.Double(frontLocation.getX() + sin(direction) * wider, frontLocation.getY() - cos(direction) * wider)
+    val startCorner = getScopeStart(wider)
     val area = new Rectangle2D.Double(startCorner.getX(), startCorner.getY(), stoppingDistance(), width + 2 * wider)
     val trans = new AffineTransform {
       rotate(direction, startCorner.getX, startCorner.getY)
@@ -168,24 +178,38 @@ class Car(game: Game) {
 
     val sec = time / 10E8
     val distanceToNext = (location distance nextLeg) - Constants.preferredGap - length / 2
+    
+    if (game.otherCarIn(scope, Some(this)).isDefined) {
+      val space = game.spaceIn(this) + length / 2 // + length/2 because the steering takes in account the distance from th emiddle of the car
+      if (space - Constants.preferredGap - length/2 < 1) {
+        return
+      }
+      val tempLegDir = Constants.angle(location, nextLeg)
+      this.steering = arriveTowards(new Point2D.Double(location.getX() + cos(tempLegDir) * space, location.getY() + sin(tempLegDir) * space), sec)
 
-    if (steeringType == Car.Seek || distanceToNext > this.stoppingDistance()) {
-      this.steering = steerTowards(nextLeg, sec)
     } else {
-      if (distanceToNext < 0) return
-      this.steering = arriveTowards(nextLeg, sec)
-    }
-
-    if (!game.allSpaceIn(scope)) {
-      val space = game.spaceIn(scope) - Constants.preferredGap
-      if (space > 0) steering.acceleration = -0.5 * velocity * velocity / space
+      if (steeringType == Car.Seek || distanceToNext > this.stoppingDistance()) {
+        this.steering = steerTowards(nextLeg, sec)
+      } else {
+        if (hasArrived) return
+        this.steering = arriveTowards(nextLeg, sec)
+      }
     }
 
     speed = speed.operate(steering, sec)
     speed.velocity = min(Constants.maxSpeed, speed.velocity)
+    val otherInScope = game.otherCarIn(this.graphic.outline, Some(this))
+    if (otherInScope.isDefined) {
+      if (otherInScope.get.location.getX() > location.getX())
+      speed.velocity *= 0.9
+    }
     val dx = cos(direction) * velocity * sec
     val dy = sin(direction) * velocity * sec
     location = new Point2D.Double(x + dx, y + dy)
+    
+    if (passedPoint(nextLeg)) {
+      game.findNextLeg(this)
+    }
 
   }
 
@@ -205,6 +229,33 @@ class Car(game: Game) {
 
     speed.steerFor(desiredSpeed, time)
 
+  }
+
+  def isInScope(area: Shape) = {
+    val tryIntersection = new Area(area)
+    tryIntersection.intersect(graphic.outline)
+    !tryIntersection.isEmpty()
+  }
+  /**
+   * Checks what is the one-dimensional location of this car in another cars scope, that is, distance from the start side of the other car's scope
+   */
+  def positionInScope(another: Car): Double = {
+    val wider = another.width * 0.2
+    val scopeStart = another.getScopeStart(wider)
+    val maxLength = another.stoppingDistance() + 5
+    var currentLength = 1.0
+    val step = 1
+    var area = new Rectangle2D.Double(scopeStart.getX(), scopeStart.getY(), currentLength, another.width + 2 * wider)
+    val trans = new AffineTransform {
+      rotate(direction, scopeStart.getX, scopeStart.getY)
+    }
+    var trySubScope = trans.createTransformedShape(area)
+    while (!isInScope(trySubScope) && currentLength <= maxLength) {
+      currentLength += step
+      area = new Rectangle2D.Double(scopeStart.getX(), scopeStart.getY(), currentLength, another.width + 2 * wider)
+      trySubScope = trans.createTransformedShape(area)
+    }
+    currentLength
   }
 
 }

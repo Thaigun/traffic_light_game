@@ -24,7 +24,11 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     var roadO: Option[Road] = None
     var roadI: Option[Road] = None
     def tryAddIn(road: Road) = {
-      val dirIn = Constants.angle(location, road.start)
+      val dirIn = if(road.hasPrevRoad) {
+        Constants.angle(location, road.previousRoad.get.endM)
+      } else {
+        Constants.angle(location, road.start)
+      }
       if (moreThan < lessThan) {
         if (dirIn <= lessThan && dirIn >= moreThan) { roadI = Some(road) }
       } else {
@@ -95,8 +99,6 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
         val x = location.getX() + totalLanes * Constants.laneWidth / 2 - roadO.get.numOfLanes * Constants.laneWidth
         new Point2D.Double(x, y)
       }
-//      val totalOutWidth = if (roadO.isEmpty) 0 else roadO.get.numOfLanes * Constants.laneWidth
-//      moveR(right, -totalOutWidth)
     }
     def normal: Double = side match {
       case 'l' => Pi
@@ -135,6 +137,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
       case 'u' => new Point2D.Double(point.x + howMuch, point.y)
       case 'd' => new Point2D.Double(point.x - howMuch, point.y)
     }
+   
   }
 
   def height = max(Constants.laneWidth, max(sideL.height, sideR.height))
@@ -224,8 +227,17 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
 
   def rightEndIsTouching(road: Road) = {
     val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
-    val tempAngle = Constants.angle(side.getInCoord, road.start)
+    val tempAngle = if (road.hasPrevRoad) {
+      Constants.angle(middlePointOfIncoming(road), road.previousRoad.get.endM)
+    } else {
+      Constants.angle(side.getInCoord, road.start)
+    }
     if (side.side == 'l') tempAngle > 0 else tempAngle < side.normal
+  }
+  
+  def middlePointOfIncoming(road:Road) = {
+    val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
+    side.moveR(side.getInCoord, -0.5 * road.numOfLanes * Constants.laneWidth)
   }
 
 }

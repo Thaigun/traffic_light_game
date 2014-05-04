@@ -31,10 +31,16 @@ class FileReader(game: Game) {
   }
   
   def read = {
+    game.setSize(getSize)
     game.setCrossings(getCrossings)
     game.setRoads(getRoads)
     buildCrossings(game.crossings)
   }  
+  
+  private def getSize = {
+    val sizeString = rowsInFile.find(_.startsWith("siz")).getOrElse(throw new Exception("The game size must be defined")).drop(3).split(',')
+    (sizeString(0).toInt, sizeString(1).toInt)
+  }
   
   private def getCrossings(): Array[Crossing] = {
     //Strings that define crossings

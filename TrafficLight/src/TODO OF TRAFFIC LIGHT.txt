@@ -1,2 +1,4 @@
 TODO OF TRAFFIC LIGHT
-Risteys-metodit toimimaan oikein, etenkin getEndingPointFor ja RoadGraphin loppusektorin piirtävä metodi sekä CrossingLane-nuolet kuntoon
+CrossingLane-nuolet
+seuraavan navigointipisteen haku
+muiden autojen väistely

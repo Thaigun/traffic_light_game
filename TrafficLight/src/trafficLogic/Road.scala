@@ -20,11 +20,24 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     if (leftIsTouching) {
       touchingCorner
     } else {
-      val theta = Constants.angle(touchingCorner, new Point2D.Double(x2, y2))
-      val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance new Point2D.Double(x2, y2)))
-      val sigma = theta + alfa
-      val leftCorner = new Point2D.Double(touchingCorner.getX() + sin(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY() - cos(sigma) * Constants.laneWidth * numOfLanes)
-      leftCorner
+      if (!hasNextCross) {
+        val theta = Constants.angle(touchingCorner, new Point2D.Double(x2, y2))
+        val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance new Point2D.Double(x2, y2)))
+        val sigma = theta + alfa
+        val leftCorner = new Point2D.Double(touchingCorner.getX() + sin(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY() - cos(sigma) * Constants.laneWidth * numOfLanes)
+        leftCorner
+      } else {
+        if (nextCrossing.get.rightEndIsTouching(this)) {
+          val sigma = Constants.angle(touchingCorner, nextCrossing.get.getEndingPointFor(this)) - Pi
+          new Point2D.Double(touchingCorner.getX + cos(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY + sin(sigma) * Constants.laneWidth * numOfLanes)
+        } else {
+          val theta = Constants.angle(touchingCorner, nextCrossing.get.getEndingPointFor(this))
+          val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance new Point2D.Double(x2, y2)))
+          val sigma = theta + alfa
+          val leftCorner = new Point2D.Double(touchingCorner.getX() + sin(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY() - cos(sigma) * Constants.laneWidth * numOfLanes)
+          leftCorner
+        }
+      }
     }
   }
 
@@ -73,7 +86,8 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
         Some(previousRoad.get.right.endR)
       }
     } else if (!hasPrevCross && hasNextCross) {
-      val leftTouches = (previousRoad.get.left.endL distance nextCrossing.get.location) <= (previousRoad.get.right.endR distance nextCrossing.get.location)
+      val leftTouches = (previousRoad.get.left.endL distance nextCrossing.get.middlePointOfIncoming(this)) <=
+        (previousRoad.get.right.endR distance nextCrossing.get.middlePointOfIncoming(this))
       leftIsTouching = leftTouches
       rightIsTouching = !leftTouches
       if (leftTouches) Some(previousRoad.get.left.endL) else Some(previousRoad.get.right.endR)
@@ -109,6 +123,6 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
   }
 
   //TODO: Also if they are bigger than the map!
-  def startsFromEdge = !hasPrevRoad && !hasPrevCross && (startX <= 0 || startY <= 0)
-  def endsToEdge = !hasNextRoad && !hasNextCross && (end.getX == 0 || end.getY == 0)
+  def startsFromEdge = !hasPrevRoad && !hasPrevCross// && (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
+  def endsToEdge = (!hasNextRoad && !hasNextCross)//  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
 }

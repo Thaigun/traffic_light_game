@@ -3,6 +3,7 @@ package graphical
 import trafficLogic._
 import java.awt.geom.AffineTransform
 import java.awt.geom.RoundRectangle2D
+import java.awt.geom.Area
 
 class CarGraph(val car: Car) {
   val color = Constants.carColor
@@ -12,7 +13,7 @@ class CarGraph(val car: Car) {
     val transform = new AffineTransform {
       rotate(car.direction, car.cornerLocation.getX(), car.cornerLocation.getY())
     }
-    transform.createTransformedShape(rect)
+    new Area(transform.createTransformedShape(rect))
   }
 
 }

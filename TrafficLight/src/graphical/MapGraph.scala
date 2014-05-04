@@ -7,22 +7,46 @@ import javax.swing.UIManager
 
 object MapGraph extends SimpleSwingApplication {
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-  
+
   val game = new Game
   game.gameFile = Source.fromFile("src/gamefile.txt")
   game.readFile
+  val gameThread = new Thread(game)
   val gamePanel = new GamePanel(game)
   game.panel = gamePanel
-  
+
+  val startButton = new Button("Start Game") {
+    action = new Action("Start Game") {
+      def apply = {
+        /*Start the game-related processing in a new thread*/
+        try {
+          gameThread.start()
+        } catch {
+          case _: Throwable =>
+        }
+      }
+    }
+  }
+  val endButton = new Button("Give Up") {
+    action = new Action("Give Up") {
+      def apply = game.resigned = true
+    }
+  }
+  val buttons = new BoxPanel(Orientation.Horizontal) {
+    contents += startButton
+    contents += endButton
+  }
+  val contentHolder = new BoxPanel(Orientation.Vertical) {
+    contents += buttons
+    contents += gamePanel
+  }
+
   val gameWindow = new MainFrame() {
     title = "Traffic light challenge!"
-    maximize()
-    contents = gamePanel
-    
+
+    contents = contentHolder
+
   }
-/*Start the game-related processing in a new thread*/  
-  val gameThread = new Thread(game)  
-  gameThread.start()
 
   def top() = this.gameWindow
 }
