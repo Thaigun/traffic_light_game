@@ -5,14 +5,14 @@ import java.awt.geom.Point2D
 import scala.math._
 
 object Constants {
-   val laneWidth = 60
+   val laneWidth = 40
    val trafLineColor = Color.yellow
    val roadColor = Color.LIGHT_GRAY
-   val maxSpeed = 100
-   val crossWidth = 1.5 * laneWidth
+   val maxSpeed = 180
+   val crossWidth = 2 * laneWidth
    
-   val preferredBreak = 40 // px/s^2
-   val preferredGap = 20
+   
+   val preferredGap = 7
    
    /*From file*/
    val carNumber = 10

@@ -20,7 +20,7 @@ object MapGraph extends SimpleSwingApplication {
     contents = gamePanel
     
   }
-  
+/*Start the game-related processing in a new thread*/  
   val gameThread = new Thread(game)  
   gameThread.start()
 

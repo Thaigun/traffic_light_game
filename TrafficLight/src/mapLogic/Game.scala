@@ -50,7 +50,7 @@ class Game extends Runnable {
   }
   
   def spaceIn(area: Shape): Double = {
-    ???
+    900
   }
 
   //Checks that the map is correctly builded and no conflicts are encountered.

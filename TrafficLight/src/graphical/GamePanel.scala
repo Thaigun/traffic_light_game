@@ -1,6 +1,7 @@
 package graphical
 
 import mapLogic._
+import java.awt.geom.Rectangle2D
 import trafficLogic._
 import scala.collection.mutable.Buffer
 import scala.swing._
@@ -20,8 +21,8 @@ class GamePanel(game: Game) extends Panel {
   this.background = Color.WHITE
 
   override def paintComponent(g: Graphics2D) = {
-    g.setColor(Color.CYAN)
-    g.setBackground(Color.PINK)
+    g.setBackground(Color.white)
+    g.clearRect(0, 0, 2000, 2000)
 
     for (road <- roads) {
       g.setColor(Constants.roadColor)
@@ -52,13 +53,12 @@ class GamePanel(game: Game) extends Panel {
       g.fill(car.outline)
       g.setColor(Color.green)
       g.draw(car.car.scope)
-
-      import java.awt.geom.Rectangle2D
+      g.drawString(car.car.speed.toString, 100,100)
       g.setColor(Color.red)
-      g.draw(new Rectangle2D.Double(car.car.frontLocation.getX(), car.car.frontLocation.getY(), 2, 2))
-      //    g.draw(new Rectangle2D.Double(630,360, 2, 2))
+      g.draw(new Rectangle2D.Double(car.car.nextLeg.getX(), car.car.nextLeg.getY, 2, 2))
+      g.draw(new Line2D.Double(car.car.nextLeg, car.car.location))
     }
-
+    
   }
 
   def run = {
