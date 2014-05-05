@@ -2,13 +2,14 @@ package graphical
 
 import trafficLogic._
 import java.awt.geom.Point2D
-import java.awt.geom.Arc2D;
+import java.awt.geom.Arc2D
 import java.awt.geom.AffineTransform
 import java.awt.geom.Rectangle2D
 import java.awt.Shape
 import java.awt.geom.Line2D
 import scala.swing._
 import scala.math._
+import mapLogic.Constants
 
 class RoadGraph(val road: Road) {
   val rect = new Rectangle2D.Double(road.x1, road.y1, road.length, Constants.laneWidth * road.numOfLanes)

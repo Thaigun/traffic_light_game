@@ -4,9 +4,10 @@ import mapLogic._
 import java.awt.geom.Point2D
 import graphical._
 import scala.math._
+import mapLogic.Constants
 
 class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, startY: Int)(private val x2: Int, private val y2: Int) {
-  def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size >= n) Some(lanes(n)) else None
+  def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size > n) Some(lanes(n)) else None
   def right: Lane = this(numOfLanes - 1).get
   def left: Lane = this(0).get
 
@@ -51,6 +52,7 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
   }
 
   lazy val lanes = Array.tabulate(numOfLanes)((n: Int) => new Lane(this, n))
+  var weight = 10
   var previousCrossing: Option[Crossing] = None
   var nextCrossing: Option[Crossing] = None
   var previousRoad: Option[Road] = None
@@ -106,23 +108,41 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     else apply(numOfLanes / 2).get.endM
   }
 
+  /*
+   * Returns which lane of the current road should be taken to get to another road if the car  is currently on given lane.
+   */
   def whichLaneFor(current: Lane, road: Road): Option[Lane] = {
     if (!hasNextRoad && !hasNextCross) return None
+    
     if (hasNextRoad && nextRoad.get == road) {
-      if (this.numOfLanes <= road.numOfLanes) Some(current)
-      else {
-        if (current.isLeft) current.laneRight else current.laneLeft
+      if (this.leftIsTouching) {
+        if (current.laneNumber < road.numOfLanes) return apply(current.laneNumber) else return current.laneLeft
+      } else {
+        val thisRev = lanes.reverse
+        val otherRev = road.lanes.reverse
+        val i = numOfLanes - current.laneNumber - 1
+        if (i < otherRev.size) Some(thisRev(i)) else Some(thisRev(i-1))
       }
+      
     } else if (hasNextRoad) {
       None
     } else {
       val crossing = nextCrossing.getOrElse(throw new Exception("Cannot find a crossingLane because there's no next Crossing"))
+      if (crossing.lanes.exists(lane => lane.in == current && lane.out.getRoad == road)) return Some(current)
       val crossingLane = crossing.lanes.find(_.out.getRoad == road).getOrElse(throw new Exception("The desired road " + road.id + " is not accessible from this road: " + id))
       this.lanes.find(_ == crossingLane.in)
     }
   }
 
-  //TODO: Also if they are bigger than the map!
   def startsFromEdge = !hasPrevRoad && !hasPrevCross// && (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
   def endsToEdge = (!hasNextRoad && !hasNextCross)//  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
+  
+  /**
+   * Finds the next road that could be aimed to from this road. Depends on the defined weight of each possible road
+   */
+  def raffleNextRoad: Option[Road] = {
+    if (this.hasNextRoad) return this.nextRoad
+    val possible = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
+    Some(Constants.getRoadWeighted(possible))
+  }
 }

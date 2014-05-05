@@ -4,6 +4,7 @@ import trafficLogic._
 import java.awt.geom.AffineTransform
 import java.awt.geom.RoundRectangle2D
 import java.awt.geom.Area
+import mapLogic.Constants
 
 class CarGraph(val car: Car) {
   val color = Constants.carColor

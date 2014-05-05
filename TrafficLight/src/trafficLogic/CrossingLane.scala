@@ -4,6 +4,7 @@ import mapLogic._
 import scala.math._
 import graphical._
 import java.awt.geom.Point2D
+import mapLogic.Constants
 
 
 /**

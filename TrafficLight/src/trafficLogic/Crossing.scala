@@ -5,6 +5,7 @@ import java.awt.geom.Point2D
 import java.awt.geom.Arc2D
 import graphical._
 import scala.math._
+import mapLogic.Constants
 
 /**
  * Each crossing has a fixed amount of links that roads can link into. The crossing can be thought as a "virtual" rectangle where two roads
@@ -238,6 +239,10 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
   def middlePointOfIncoming(road:Road) = {
     val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
     side.moveR(side.getInCoord, -0.5 * road.numOfLanes * Constants.laneWidth)
+  }
+  
+  def laneFromTo(from: Lane, to: Road) = {
+    lanes.find(lane => lane.in == from && lane.out.getRoad == to)
   }
 
 }

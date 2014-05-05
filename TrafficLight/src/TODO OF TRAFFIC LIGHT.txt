@@ -2,3 +2,4 @@ TODO OF TRAFFIC LIGHT
 CrossingLane-nuolet
 seuraavan navigointipisteen haku
 muiden autojen väistely
+Kaistanvaihdot

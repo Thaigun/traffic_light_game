@@ -1,8 +1,9 @@
-package graphical
+package mapLogic
 
 import java.awt.Color
 import java.awt.geom.Point2D
 import scala.math._
+import trafficLogic._
 
 object Constants {
    val laneWidth = 40
@@ -15,7 +16,7 @@ object Constants {
    val preferredGap = 7
    
    /*From file*/
-   val carNumber = 4
+   val carNumber = 10
    val goal = 10
    /*--------*/
    
@@ -24,6 +25,24 @@ object Constants {
    }
    
    def carColor = Color.blue
+   
+   def getRoadWeighted(roads: Array[Road]) = {
+     val totalSum = roads.map(_.weight).sum
+     val rand = new scala.util.Random()
+     val hit = rand.nextInt(totalSum)
+     
+     var holder = roads(0).weight - 1
+     var i = 0
+     while (holder < hit) {
+       i += 1
+       holder += roads(i).weight
+       
+     }
+     roads(i)
+     
+   }
+     
+   
    
    
 }
