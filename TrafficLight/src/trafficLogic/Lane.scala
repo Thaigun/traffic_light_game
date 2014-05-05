@@ -34,6 +34,7 @@ class Lane(road: Road, val laneNumber: Int) {
   // Parameter d tells the one-dimensional coordinate on this lane, the distance from the startM towards the point on this lane
   def pointAtDistance(d: Double) = {
     new Point2D.Double(startM.getX() + cos(road.rotation) * d, startM.getY() + sin(road.rotation) * d)
+    
   }
   
   private def findNextLane: Option[Lane] = {

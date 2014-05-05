@@ -48,7 +48,7 @@ class Car(game: Game, firstGoal: NavGoal) {
     def +(other: SpeedVector) = {
       val newdX = this.offsetAfter(1).getX() + other.offsetAfter(1).getX()
       val newdY = this.offsetAfter(1).getY() + other.offsetAfter(1).getY()
-      val velo = sqrt(pow(newdX, 2) + pow(newdY, 2))
+      val velo = sqrt(newdX * newdX + newdY * newdY)
       val dir = atan2(newdY, newdX)
       new SpeedVector(velo, dir)
     }
@@ -114,7 +114,7 @@ class Car(game: Game, firstGoal: NavGoal) {
   def cornerY = cornerLocation.getY()
   def x = location.getX()
   def y = location.getY()
-  
+
   var nextCrossingLane: Option[CrossingLane] = None
   var currentCrossingLane: Option[CrossingLane] = None
   var currentLane: Option[Lane] = None
@@ -132,7 +132,6 @@ class Car(game: Game, firstGoal: NavGoal) {
 
   def goalCheck = {
     if (navGoal.kind == NavGoal.goal && passedPoint(nextLeg) && ((location distance nextLeg) < Constants.laneWidth)) {
-      println("REMOVED")
       true
     } else { false }
   }
@@ -190,13 +189,14 @@ class Car(game: Game, firstGoal: NavGoal) {
    * @param time: Time since the last calculation in milliseconds
    */
   def calc(time: Long): Unit = {
+
     if (hasArrived) return
 
     val sec = time / 10E8
     val distanceToNext = (location distance nextLeg) - Constants.preferredGap - length / 2
 
     if (game.otherCarIn(scope, Some(this)).isDefined) {
-      val space = game.spaceIn(this) + length / 2 // + length/2 because the steering takes in account the distance from th emiddle of the car
+      val space = game.spaceIn(this) + length / 2 // + length/2 because the steering takes in account the distance from the middle of the car
       if (space - Constants.preferredGap - length / 2 < 1) {
         return
       }
@@ -226,10 +226,16 @@ class Car(game: Game, firstGoal: NavGoal) {
     if (this.passedPoint(nextLeg) || this.navGoal.kind == NavGoal.greenLights || this.navGoal.kind == NavGoal.redLights) {
       game.findNextLeg(this)
     }
+    
+    if(road.get.id == "0003" && this.currentLane.get != this.targetLane.get) {
+      println
+      println("current " +currentLane.get)
+      println("target "+targetLane.get)
+    }
 
     if (this.currentLane.get != this.targetLane.get) {
       this.navGoal.kind = NavGoal.laneSwitch
-      this.navGoal.position = currentLane.get.pointAtDistance(max(location distance (currentLane.get.startM), road.get.length))
+      this.navGoal.position = targetLane.get.pointAtDistance(min(location.distance(currentLane.get.startM) + 2 * length, road.get.length))
       this.currentLane = this.targetLane
       if (this.nextCrossing.isDefined) nextCrossingLane = nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
     }
@@ -238,15 +244,15 @@ class Car(game: Game, firstGoal: NavGoal) {
 
   def steerTowards(pt: Point2D.Double, time: Double) = {
     val desiredVelocity = Constants.maxSpeed
-    val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
-    var steering = speed.steerFor(desiredSpeed, time)
-
-//    if (currentLane.isDefined) {
-//      val middleOfLane = currentLane.get.pointAtDistance(location distance currentLane.get.startM)
-//      steering = steering + new AccelVector(0.1* (location distance middleOfLane), Constants.angle(location, middleOfLane))
-//    }
-
-    steering
+    val midPoint = currentLane.get.pointAtDistance(location.distance(currentLane.get.startM))
+    if ((location distance midPoint) > Constants.laneWidth * 0.15 && navGoal.kind != NavGoal.roadStart) {
+      val vectorToMiddle = new SpeedVector(location.distance(midPoint), Constants.angle(location, midPoint))
+      val desiredSpeed = vectorToMiddle + new SpeedVector(desiredVelocity, Constants.angle(location, pt))
+      speed.steerFor(desiredSpeed, time)
+    } else {
+      val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
+      speed.steerFor(desiredSpeed, time)
+    }
   }
 
   //Returns a boolean value indicating if the vehicle has arrived to the destination
@@ -255,13 +261,7 @@ class Car(game: Game, firstGoal: NavGoal) {
     val speedForDistance = (10 / Constants.maxSpeed) * (sqrt(2 * (distance) * -break)) //Constants.maxSpeed * ((pt distance location)*0.9) / this.stoppingDistance(Constants.maxSpeed)
     val desiredVelocity = min(Constants.maxSpeed, speedForDistance)
     val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
-
-    var steering = speed.steerFor(desiredSpeed, time)
-
-    //    val middleOfLane = if (currentLane.isDefined) currentLane.get.pointAtDistance(location distance currentLane.get.startM) else new Point2D.Double()
-    //    if (currentLane.isDefined) steering = steering + new AccelVector(1.5* (location distance middleOfLane), Constants.angle(location, middleOfLane))
-
-    steering
+    speed.steerFor(desiredSpeed, time)
   }
 
   def isInScope(area: Shape) = {
@@ -290,8 +290,8 @@ class Car(game: Game, firstGoal: NavGoal) {
     }
     currentLength
   }
-  
-  override def toString = "Car no. "+(game.cars.indexOf(this)+1)+ " at "+ location.getX()+", "+location.getY()
+
+  override def toString = "Car no. " + (game.cars.indexOf(this) + 1) + " at " + location.getX() + ", " + location.getY()
 
 }
 

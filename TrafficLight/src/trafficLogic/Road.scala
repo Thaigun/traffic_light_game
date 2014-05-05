@@ -115,8 +115,8 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     if (!hasNextRoad && !hasNextCross) return None
     
     if (hasNextRoad && nextRoad.get == road) {
-      if (this.leftIsTouching) {
-        if (current.laneNumber < road.numOfLanes) return apply(current.laneNumber) else return current.laneLeft
+      if (road.leftIsTouching) {
+        if (current.laneNumber <= road.numOfLanes - 1) return Some(current) else return current.laneLeft
       } else {
         val thisRev = lanes.reverse
         val otherRev = road.lanes.reverse
@@ -145,4 +145,6 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     val possible = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
     Some(Constants.getRoadWeighted(possible))
   }
+  
+  override def toString = "Road id "+id+" having next crossing: "+hasNextCross+ " or nextRoad: "+hasNextRoad
 }

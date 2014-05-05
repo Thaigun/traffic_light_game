@@ -65,12 +65,13 @@ class Game extends Runnable {
       currentLane = Some(lane)
       navGoal = goal
       nextRoad = next
-      if (whichRoad.hasNextCross) {
-        nextCrossingLane = {
-          whichRoad.nextCrossing.get.laneFromTo(lane, next.get)
-        }
-      }
+      
     }
+    if (whichRoad.hasNextCross) {
+        val nextcrossinglane =  whichRoad.nextCrossing.get.laneFromTo(car.targetLane.get, next.get)
+        car.nextCrossingLane = nextcrossinglane
+    }
+    
     cars += car
 
   }
@@ -139,26 +140,6 @@ class Game extends Runnable {
   }
 
   def findNextLeg(car: Car): Unit = {
-    // passedPoint(nextLeg) || hasArrived || navGoal.kind == NavGoal.redLights || navGoal.kind == NavGoal.greenLights
-    //    println(car.passedPoint(car.nextLeg))
-    //    println(car.navGoal.kind)
-    //    println(car.navGoal.onRoad.id)
-    //    if (car.navGoal.kind == NavGoal.greenLights) {
-    //      val nextCrossing = car.navGoal.onRoad.nextCrossing.getOrElse(throw new Exception("NavGoal-type can't be red or green lights if there is no next crossing"))
-    //      val crossLane = nextCrossing.lanes.find(lane => lane.in == car.currentLane.get && lane.out.getRoad == car.nextRoad.get).get
-    //      if (!crossLane.isEnabled) { car.navGoal.kind = NavGoal.redLights }
-    //      else if (car.passedPoint(car.nextLeg)) {
-    //        car.navGoal = new NavGoal(crossLane.out.startM.getX(), crossLane.out.startM.getY(), crossLane.out.getRoad) {
-    //          kind = NavGoal.roadStart
-    //        }
-    //        car.currentLane = Some(crossLane.out)
-    //        
-    //      }
-    println
-    println(car.navGoal.kind)
-    println(car)
-    println("nextCrossing: "+car.nextCrossingLane.isDefined)
-    if (car.nextCrossing.isDefined)println("next crossing: " + car.nextCrossing.get.id)
     
     def handleGreen = {
       val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane"))
@@ -174,8 +155,6 @@ class Game extends Runnable {
     }
 
     def handleRed = {
-      println("In handleRed, next crossing lane id:")
-      println(car.nextCrossingLane.get.id)
       val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane, "+cars.indexOf(car)))
       if (crossLane.isEnabled) {
         car.navGoal.kind = NavGoal.greenLights
@@ -183,11 +162,20 @@ class Game extends Runnable {
     }
 
     def handleEnd = {
-      if (car.passedPoint(car.nextLeg)) {
+      try {
+        if (car.passedPoint(car.nextLeg)) {
         val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
           kind = NavGoal.roadStart
         }
         car.navGoal = newGoal
+      }} catch {
+        case a: Throwable => {
+          println("current "+car.currentLane.isDefined)
+          if (car.currentLane.isDefined) println("current next "+car.currentLane.get.nextLane.isDefined)
+          println("next road "+car.hasNextRoad)
+          println("Error caused by : "+car)
+          throw a
+        }
       }
     }
 
@@ -219,7 +207,10 @@ class Game extends Runnable {
     def handleSwitch = {
       if (car.navGoal.kind == NavGoal.laneSwitch && car.passedPoint(car.nextLeg)) {
         car.navGoal.position = car.currentLane.get.endM
-        car.navGoal.kind = NavGoal.roadEnd
+        if (car.road.get.hasNextRoad) car.navGoal.kind = NavGoal.roadEnd
+        else if (car.road.get.hasNextCross) car.navGoal.kind = NavGoal.redLights
+        else if (car.road.get.endsToEdge) car.navGoal.kind = NavGoal.goal
+        
       }
     }
 
@@ -231,39 +222,5 @@ class Game extends Runnable {
       case NavGoal.goal => handleGoal
       case NavGoal.laneSwitch => handleSwitch
     }
-    //
-    //    } else if (car.navGoal.kind == NavGoal.redLights) {
-    //      val nextCrossing = car.navGoal.onRoad.nextCrossing.getOrElse(throw new Exception("NavGoal-type can't be red or green lights if there is no next crossing"))
-    //      val crossLane = nextCrossing.lanes.find(lane => lane.in == car.currentLane.get && lane.out.getRoad == car.nextRoad.get).get
-    //      if (crossLane.isEnabled) {
-    //        println("enable lights")
-    //        car.navGoal.kind = NavGoal.greenLights
-    //      }
-    //
-    //    } else if (car.navGoal.kind == NavGoal.goal) {
-    //      return // Score updating is handled by car-class
-    //
-    //    } else if (car.navGoal.kind == NavGoal.roadEnd) {
-    //      try{
-    //        car.currentLane = car.currentLane.get.nextLane
-    //        car.nextRoad = car.road.get.raffleNextRoad
-    //        car.navGoal = new NavGoal(car.currentLane.get.startM.getX(), car.currentLane.get.startM.getY(), car.road.get) {
-    //          kind = NavGoal.roadStart
-    //        }
-    //      } catch{
-    //        case a: Throwable => 
-    //      }
-    //    } else if (car.navGoal.kind == NavGoal.roadStart) {
-    //      car.navGoal = NavGoal(car.currentLane.get.endM, car.road.get)
-    //      if (car.road.get.endsToEdge) {
-    //        car.navGoal.kind = NavGoal.goal
-    //      } else if (car.road.get.hasNextRoad) {
-    //        car.navGoal.kind = NavGoal.roadEnd
-    //      } else if (car.road.get.hasNextCross) {
-    //        car.navGoal.kind = NavGoal.redLights //If the light is green, it will be corrected during the next loop
-    //      }
-    //
-    //    }
-    //  }
   }
 }
