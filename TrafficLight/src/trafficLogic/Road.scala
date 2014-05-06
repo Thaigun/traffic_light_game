@@ -147,7 +147,6 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     if (this.hasNextRoad) return this.nextRoad
     val allOut = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
     val possible = allOut.filter(r => nextCrossing.get.lanes.exists((lane: CrossingLane) => lane.in.getRoad == this && lane.out.getRoad == r))
-    println(id)
     Some(Constants.getRoadWeighted(possible))
   }
 

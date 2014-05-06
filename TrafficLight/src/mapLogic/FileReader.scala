@@ -6,6 +6,7 @@ import java.awt.geom.Point2D
 import scala.collection.mutable.Buffer
 import scala.io._
 import trafficLogic._
+import graphical._
 import scala.Predef._
 
 
@@ -61,6 +62,7 @@ class FileReader(game: Game) {
     game.setRoads(getRoads)
     buildCrossings(game.crossings)
     game.goal = findGoal
+    game.addThumbnails(thumbnails)
   }  
   
   private def findGoal: Int = {
@@ -143,5 +145,17 @@ class FileReader(game: Game) {
     for (cross <- arr) {
       cross.build
     }
+  }
+  
+  def thumbnails = {
+    val thumbStrings = rowsInFile.filter(_.startsWith("thu"))
+    val thumbNails: Array[CrossingButton] = Array.ofDim(thumbStrings.size)
+    for (i <- thumbNails.indices) {
+      val splitted = thumbStrings(i).drop(3).split(',')
+      val crossing = game.crossings.find(_.id == splitted(0)).getOrElse (throw new Exception ("A crossing that a thumbnail is linked to was not found"))
+      val location = new Point2D.Double(splitted(2).split('.')(0).toDouble, splitted(2).split('.')(1).toDouble)
+      thumbNails(i) = new CrossingButton(crossing, splitted(1).head, location, splitted(3))
+    }
+    thumbNails
   }
 }

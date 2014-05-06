@@ -20,6 +20,7 @@ class Game extends Runnable {
   var roads: Array[Road] = Array()
   var cars: Buffer[Car] = Buffer()
   var crossings: Array[Crossing] = Array()
+  var buttons: Array[CrossingButton] = Array()
   var size: (Int, Int) = (0, 0)
 
   /*
@@ -47,6 +48,10 @@ class Game extends Runnable {
     this.crossings = crossingArr
   }
 
+  def addThumbnails(thu: Array[CrossingButton]) = {
+    this.buttons = thu
+  }
+  
   def createCar = {
     val edgeRoads = roads.filter(_.startsFromEdge)
     val random = new Random()
