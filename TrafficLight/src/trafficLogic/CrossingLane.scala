@@ -16,9 +16,8 @@ import mapLogic.Constants
 class CrossingLane(val id: String, val crossing: Crossing, green: Array[Char], connection: String) {
   
   def isEnabled = {
-    
-    if (id == "12") println(crossing.currentCombo)
-    green.contains(crossing.currentCombo)
+    if (crossing.previousCombo.isDefined) green.contains(crossing.previousCombo.get) && green.contains(crossing.getCurrentCombo)
+    else green.contains(crossing.getCurrentCombo)
   }
   
   lazy val start = findStart

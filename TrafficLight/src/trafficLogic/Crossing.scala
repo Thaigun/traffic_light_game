@@ -6,6 +6,8 @@ import java.awt.geom.Arc2D
 import graphical._
 import scala.math._
 import mapLogic.Constants
+import javax.swing._
+import java.awt.event.ActionEvent
 
 /**
  * Each crossing has a fixed amount of links that roads can link into. The crossing can be thought as a "virtual" rectangle where two roads
@@ -25,7 +27,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     var roadO: Option[Road] = None
     var roadI: Option[Road] = None
     def tryAddIn(road: Road) = {
-      val dirIn = if(road.hasPrevRoad) {
+      val dirIn = if (road.hasPrevRoad) {
         Constants.angle(location, road.previousRoad.get.endM)
       } else {
         Constants.angle(location, road.start)
@@ -138,13 +140,31 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
       case 'u' => new Point2D.Double(point.x + howMuch, point.y)
       case 'd' => new Point2D.Double(point.x - howMuch, point.y)
     }
-   
+
   }
 
   def height = max(Constants.laneWidth, max(sideL.height, sideR.height))
   def width = max(Constants.laneWidth, max(sideD.width, sideU.width))
 
-  var currentCombo: Char = combinations.head
+  /*
+   * The previousCombo is used by a CrossingLane to determine whether it should remain enabled during light-change. This occurs
+   * when the previousCombo is defined and the lane is enabled in that and the current combo. If the lane is not in either of them,
+   * it is disabled as long as the previousCOmbo is defined.
+   */
+  var previousCombo: Option[Char] = None
+  private var currentCombo: Char = combinations.head
+  def getCurrentCombo = currentCombo
+  def setNewCombo(c: Char) = {
+    previousCombo = Some(currentCombo)
+    currentCombo = c
+    val timerAction = new AbstractAction() {
+      def actionPerformed(event: ActionEvent): Unit = previousCombo = None
+    }
+    val timer = new Timer(2000, timerAction) {
+      setRepeats(false)
+      start
+    }
+  }
 
   val sideR = new Side(Pi / 4, -Pi / 4, 'r', this)
   val sideD = new Side(Pi * 3 / 4, Pi / 4, 'd', this)
@@ -171,7 +191,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     val rightIsTouching = if (side.side == 'l') dir < 0 else dir > side.normal
     if (rightIsTouching) {
       road.rightIsTouching = true
-      side.moveR(side.getOutCoord, road.numOfLanes*Constants.laneWidth)
+      side.moveR(side.getOutCoord, road.numOfLanes * Constants.laneWidth)
     } else {
       road.leftIsTouching = true
       connect
@@ -209,7 +229,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
       //      }
     }
   }
-  
+
   //Gets the starting point for a CrossingLane
   def getConnectStartFor(crLane: CrossingLane) = {
     val side = getSide(crLane.in.getRoad).getOrElse(throw new Exception("Did not find the right side of a crossing."))
@@ -235,16 +255,16 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     }
     if (side.side == 'l') tempAngle > 0 else tempAngle < side.normal
   }
-  
-  def middlePointOfIncoming(road:Road) = {
+
+  def middlePointOfIncoming(road: Road) = {
     val side = getSide(road).getOrElse(throw new Exception("Road " + road.id + " was not in crossing " + this.id))
     side.moveR(side.getInCoord, -0.5 * road.numOfLanes * Constants.laneWidth)
   }
-  
+
   def laneFromTo(from: Lane, to: Road) = {
     lanes.find(lane => lane.in == from && lane.out.getRoad == to)
   }
-  
-  override def toString = "Crossing id "+id
+
+  override def toString = "Crossing id " + id
 
 }

@@ -1,6 +1,7 @@
 package mapLogic
 
 import java.awt.Color
+import scala.util.Random
 import java.awt.geom.Point2D
 import scala.math._
 import trafficLogic._
@@ -16,7 +17,7 @@ object Constants {
    val preferredGap = laneWidth / 3.5
    
    /*From file*/
-   val carNumber = 2
+   val carNumber = 10
    /*--------*/
    
    def angle(a: Point2D.Double, b: Point2D.Double): Double = {
@@ -24,7 +25,10 @@ object Constants {
      if (b.getY-a.getY >= 0) acos((b.getX-a.getX) / (a distance b)) else -acos((b.getX-a.getX) / (a distance b))
    }
    
-   def carColor = Color.blue
+   def carColor = {
+     val colors = Array(Color.BLACK, Color.BLUE, Color.RED, Color.DARK_GRAY, Color.YELLOW, Color.PINK, Color.ORANGE, Color.MAGENTA)
+     colors(new Random().nextInt(colors.size - 1))
+   }
    
    def getRoadWeighted(roads: Array[Road]) = {
      val totalSum = roads.map(_.weight).sum
@@ -41,8 +45,8 @@ object Constants {
      roads(i)
      
    }
-     
    
-   
+   val redLight = Color.red
+   val greenLight = Color.green
    
 }

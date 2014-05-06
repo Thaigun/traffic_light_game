@@ -33,9 +33,11 @@ class GamePanel(game: Game) extends Panel with ImageObserver {
         case Some(s) => game.fileReader.saveScore(new Score(game.goal, game.elapsed, name.get))
         case None => game.fileReader.saveScore(new Score(game.goal, game.elapsed, "Anonymous"))
       }
-      Dialog.showMessage(this, game.fileReader.readScores, "Scoreboard", Message.Plain)
+      showScores
     }
   }
+  
+  def showScores = Dialog.showMessage(this, game.fileReader.readScores, "Scoreboard", Message.Plain)
 
   def imageUpdate(img: java.awt.Image, infoflags: Int, x: Int, y: Int, width: Int, height: Int) = {
     if ((infoflags & ImageObserver.ALLBITS) != 0) {
@@ -75,9 +77,8 @@ class GamePanel(game: Game) extends Panel with ImageObserver {
       g.draw(crossing.outLine)
     }
 
-    g.setColor(Color.GREEN)
     for (lane <- crossingLanes) {
-      g.setColor(Color.GREEN)
+      g.setColor(lane.color)
       g.draw(lane.arrow)
     }
 

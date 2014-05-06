@@ -1,6 +1,7 @@
 package graphical
 
 import trafficLogic._
+import mapLogic._
 import java.awt.Polygon
 import java.awt.geom.AffineTransform
 import java.awt.geom.Point2D
@@ -41,4 +42,6 @@ class CrossingLaneGraph(lane: CrossingLane) {
   private def midpoint(p1: Point2D.Double, p2: Point2D.Double) = {
     new Point2D.Double((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0)
   }
+  
+  def color = if (lane.isEnabled) Constants.greenLight else Constants.redLight
 }  

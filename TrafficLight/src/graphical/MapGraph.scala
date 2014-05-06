@@ -13,7 +13,6 @@ object MapGraph extends SimpleSwingApplication {
   var gameThread = new Thread(game)
   val gamePanel = new GamePanel(game)
   game.panel = gamePanel
-  game.buttons.foreach(_.listenTo(gamePanel.mouse.clicks))
   
   val startButton = new Button("Start Game") {
     action = new Action("Start Game") {
@@ -21,6 +20,7 @@ object MapGraph extends SimpleSwingApplication {
         /*Start the game-related processing in a new thread*/
         try {
           if (!gameThread.isAlive()) {
+            game.buttons.foreach(_.listenTo(gamePanel.mouse.clicks))
             gameThread = new Thread(game)
             gameThread.start()
           }
@@ -35,9 +35,15 @@ object MapGraph extends SimpleSwingApplication {
       def apply = game.resigned = true
     }
   }
+  val scoreButton = new Button("Highscores") {
+    action = new Action("Highscores") {
+      def apply = gamePanel.showScores
+    }
+  }
   val buttons = new BoxPanel(Orientation.Horizontal) {
     contents += startButton
     contents += endButton
+    contents += scoreButton
   }
   val contentHolder = new BoxPanel(Orientation.Vertical) {
     contents += buttons

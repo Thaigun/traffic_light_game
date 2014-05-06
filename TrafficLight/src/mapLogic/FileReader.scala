@@ -103,7 +103,7 @@ class FileReader(game: Game) {
     // All roads are added to the 'roads' array
     for (i <- roads.indices) {
       val splitted = roadStrings(i).drop(3).split(',')
-      require(splitted.size == 7, "The " + i + ". row in the gamefile is invalid (should have 6 fields)")
+      require(splitted.size == 7, "The " + i + ". ROAD in the gamefile is invalid (should have 7 fields), HAS"+ splitted.size + " - "+roadStrings(i))
       val coordinates = Vector[Int](splitted(2).split('.')(0).toInt, splitted(2).split('.')(1).toInt, splitted(3).split('.')(0).toInt, splitted(3).split('.')(1).toInt)
       roads(i) = new Road(game, splitted(0), splitted(1).toInt)(coordinates(0), coordinates(1))(coordinates(2), coordinates(3)) {
         weight = splitted(6).toInt
