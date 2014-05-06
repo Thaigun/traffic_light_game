@@ -12,6 +12,7 @@ import scala.swing.event.Key._
 import java.awt.geom.Line2D
 import mapLogic.Constants
 import scala.swing.Dialog._
+import java.awt.BasicStroke
 
 class GamePanel(game: Game) extends Panel {
   this.requestFocusInWindow
@@ -20,6 +21,7 @@ class GamePanel(game: Game) extends Panel {
   val crossings: Array[CrossingGraph] = game.crossings.map(_.graphic)
   val cl: Array[CrossingLane] = game.crossings.foldLeft(Array[CrossingLane]())((array, crossing) => array ++ crossing.lanes)
   val crossingLanes = cl.map(_.graphic)
+  val buttons = game.buttons
 
   this.background = Color.WHITE
 
@@ -46,12 +48,18 @@ class GamePanel(game: Game) extends Panel {
       g.fill(road.sector)
       g.fill(road.endSect)
       g.setColor(Constants.trafLineColor)
+      g.setStroke(new BasicStroke
+                       (1.0f,
+                        BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_MITER,
+                        10.0f, Array(10.0.toFloat), 0.0f))
       road.trafLines.foreach(g.draw(_))
       if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_))
       if (road.road.hasPrevRoad || road.road.hasPrevCross) road.sectorLines.foreach(g.draw(_))
 
     }
 
+    g.setStroke(new BasicStroke())
     for (crossing <- crossings) {
       g.setColor(Constants.roadColor)
       g.fill(crossing.outLine)
