@@ -13,7 +13,8 @@ object MapGraph extends SimpleSwingApplication {
   var gameThread = new Thread(game)
   val gamePanel = new GamePanel(game)
   game.panel = gamePanel
-
+  game.buttons.foreach(_.listenTo(gamePanel.mouse.clicks))
+  
   val startButton = new Button("Start Game") {
     action = new Action("Start Game") {
       def apply = {

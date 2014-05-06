@@ -1,6 +1,7 @@
 package graphical
 
 import mapLogic._
+import java.awt.image.ImageObserver
 import java.awt.Font
 import java.awt.geom.Rectangle2D
 import trafficLogic._
@@ -14,7 +15,7 @@ import mapLogic.Constants
 import scala.swing.Dialog._
 import java.awt.BasicStroke
 
-class GamePanel(game: Game) extends Panel {
+class GamePanel(game: Game) extends Panel with ImageObserver {
   this.requestFocusInWindow
   this.preferredSize = new Dimension(game.size._1, game.size._2)
   val roads: Array[RoadGraph] = game.roads.map(_.graphic)
@@ -36,6 +37,14 @@ class GamePanel(game: Game) extends Panel {
     }
   }
 
+  def imageUpdate(img: java.awt.Image, infoflags: Int, x: Int, y: Int, width: Int, height: Int) = {
+    if ((infoflags & ImageObserver.ALLBITS) != 0) {
+      repaint();
+      false; // Return false to say we don't need further notification. 
+    }
+    true; // Image has not finished loading, need further notification. 
+  }
+  
   override def paintComponent(g: Graphics2D) = {
     val carGraphs = game.cars.map(_.graphic)
 
@@ -48,11 +57,10 @@ class GamePanel(game: Game) extends Panel {
       g.fill(road.sector)
       g.fill(road.endSect)
       g.setColor(Constants.trafLineColor)
-      g.setStroke(new BasicStroke
-                       (1.0f,
-                        BasicStroke.CAP_BUTT,
-                        BasicStroke.JOIN_MITER,
-                        10.0f, Array(10.0.toFloat), 0.0f))
+      g.setStroke(new BasicStroke(1.0f,
+        BasicStroke.CAP_BUTT,
+        BasicStroke.JOIN_MITER,
+        10.0f, Array(10.0.toFloat), 0.0f))
       road.trafLines.foreach(g.draw(_))
       if (road.road.hasNextCross) road.endSectLines.foreach(g.draw(_))
       if (road.road.hasPrevRoad || road.road.hasPrevCross) road.sectorLines.foreach(g.draw(_))
@@ -78,6 +86,10 @@ class GamePanel(game: Game) extends Panel {
       g.fill(car.outline)
     }
 
+    for (button <- buttons) {
+      g.drawImage(button.getIcon.getImage(), button.point.getX().toInt, button.point.getY().toInt, this)
+    }
+
     g.setColor(Color.red)
     g.setFont(new Font(Font.SANS_SERIF, 0, 15))
     g.drawString("Score: " + game.score, 10, 20)
@@ -88,7 +100,7 @@ class GamePanel(game: Game) extends Panel {
 
     if (game.resigned) {
       g.setFont(new Font(Font.SANS_SERIF, 0, 40))
-      g.drawString("Start again by clicking the Start-button!", 140, 60) //(this.size.getHeight()-20).toInt, (this.size.getWidth()-200).toInt)
+      g.drawString("Start again by clicking the Start-button!", 140, 60)
     }
 
   }

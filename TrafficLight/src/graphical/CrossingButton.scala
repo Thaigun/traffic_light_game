@@ -6,9 +6,19 @@ import scala.swing._
 import scala.swing.event._
 import javax.swing.ImageIcon
 
-class CrossingButton(crossing: Crossing, combo: Char, val point: Point2D.Double, imgSrc: String) extends Button() {
-  action = new Action("Toggle") {
-    def apply = crossing.currentCombo = combo
+class CrossingButton(crossing: Crossing, combo: Char, val point: Point2D.Double, imgSrc: String) extends Label/* with Publisher*/ {
+  val roadsOfCrossing = (crossing.roadsIn ++ crossing.roadsOut)
+  reactions += {
+    case click: MousePressed => changeCombo(click.point)
   }
+  
   icon = new ImageIcon(imgSrc)
+  def getIcon = icon.asInstanceOf[ImageIcon]
+  
+  def changeCombo(where: java.awt.Point) {
+    if (where.getX() >= point.getX() && where.getX() <= point.getX() + icon.getIconWidth()
+        && where.getY() >= point.getY() && where.getY() <= point.getY() + icon.getIconHeight()) {
+      crossing.setNewCombo(combo)
+    }
+  }
 }

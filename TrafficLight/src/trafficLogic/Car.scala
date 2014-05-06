@@ -27,13 +27,6 @@ class Car(game: Game, firstGoal: NavGoal) {
       val dy = sin(direction) * velocity * seconds
       new Point2D.Double(dx, dy)
     }
-    def brakeFor(other: SpeedVector, inSeconds: Double = 1) = {
-      val thisOffset = this.offsetAfter(inSeconds)
-      val otherOffset = other.offsetAfter(inSeconds)
-      val amount = thisOffset distance otherOffset
-      val direction = atan2(thisOffset.getY() - otherOffset.getY(), thisOffset.getX() - otherOffset.getX())
-      new AccelVector(amount, direction)
-    }
     /**
      * How should this SpeedVector be accelerated to achieve another desired speed and direction
      */
@@ -189,6 +182,17 @@ class Car(game: Game, firstGoal: NavGoal) {
    * @param time: Time since the last calculation in milliseconds
    */
   def calc(time: Long): Unit = {
+    
+    if (this.passedPoint(nextLeg) || this.navGoal.kind == NavGoal.greenLights || this.navGoal.kind == NavGoal.redLights) {
+      game.findNextLeg(this)
+    }
+
+    if (this.currentLane.get != this.targetLane.get) {
+      this.navGoal.kind = NavGoal.laneSwitch
+      this.navGoal.position = targetLane.get.pointAtDistance(min(location.distance(currentLane.get.startM) + 2 * length, road.get.length))
+      this.currentLane = this.targetLane
+      if (this.nextCrossing.isDefined) nextCrossingLane = nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
+    }
 
     if (hasArrived) return
 
@@ -223,16 +227,7 @@ class Car(game: Game, firstGoal: NavGoal) {
     val dy = sin(direction) * velocity * sec
     location = new Point2D.Double(x + dx, y + dy)
 
-    if (this.passedPoint(nextLeg) || this.navGoal.kind == NavGoal.greenLights || this.navGoal.kind == NavGoal.redLights) {
-      game.findNextLeg(this)
-    }
-
-    if (this.currentLane.get != this.targetLane.get) {
-      this.navGoal.kind = NavGoal.laneSwitch
-      this.navGoal.position = targetLane.get.pointAtDistance(min(location.distance(currentLane.get.startM) + 2 * length, road.get.length))
-      this.currentLane = this.targetLane
-      if (this.nextCrossing.isDefined) nextCrossingLane = nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
-    }
+    
 
   }
 

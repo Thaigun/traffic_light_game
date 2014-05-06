@@ -51,7 +51,7 @@ class Game extends Runnable {
   def addThumbnails(thu: Array[CrossingButton]) = {
     this.buttons = thu
   }
-  
+
   def createCar = {
     val edgeRoads = roads.filter(_.startsFromEdge)
     val random = new Random()
@@ -167,7 +167,7 @@ class Game extends Runnable {
         }
         car.navGoal = newGoal
         car.currentCrossingLane = Some(crossLane)
-      } else if (!crossLane.isEnabled) {
+      } else if (!crossLane.isEnabled && car.stoppingDistance() > car.location.distance(car.nextLeg)) {
         car.navGoal.kind = NavGoal.redLights
       }
     }
@@ -180,21 +180,11 @@ class Game extends Runnable {
     }
 
     def handleEnd = {
-      try {
-        if (car.passedPoint(car.nextLeg)) {
-          val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
-            kind = NavGoal.roadStart
-          }
-          car.navGoal = newGoal
+      if (car.passedPoint(car.nextLeg)) {
+        val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
+          kind = NavGoal.roadStart
         }
-      } catch {
-        case a: Throwable => {
-          println("current " + car.currentLane.isDefined)
-          if (car.currentLane.isDefined) println("current next " + car.currentLane.get.nextLane.isDefined)
-          println("next road " + car.hasNextRoad)
-          println("Error caused by : " + car)
-          throw a
-        }
+        car.navGoal = newGoal
       }
     }
 

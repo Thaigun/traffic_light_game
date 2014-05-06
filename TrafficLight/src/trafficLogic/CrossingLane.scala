@@ -14,7 +14,12 @@ import mapLogic.Constants
  * @param connection: A string that describes which road this lane connects to which other road.
  */
 class CrossingLane(val id: String, val crossing: Crossing, green: Array[Char], connection: String) {
-  def isEnabled = green.contains(crossing.currentCombo)
+  
+  def isEnabled = {
+    
+    if (id == "12") println(crossing.currentCombo)
+    green.contains(crossing.currentCombo)
+  }
   
   lazy val start = findStart
   def findStart: Point2D.Double = crossing.getConnectStartFor(this)
@@ -55,4 +60,6 @@ class CrossingLane(val id: String, val crossing: Crossing, green: Array[Char], c
     this.out = outLane
     
   }
+  
+  override def toString = "CrossingLane: "+id+" at crossing: "+crossing.id+", green when "+green.foldLeft("")((s, c) => s+c)
 }
