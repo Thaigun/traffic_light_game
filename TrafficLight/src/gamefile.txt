@@ -1,6 +1,7 @@
-SIZ1920,1000
+SIZ1880,1000
 GOA 30
 #ROADS: id, numOfLanes, startingPoint(irrelevant if there is a previous road), endingPoint, prev road(or 2-char crossing), next road(---), weight
+ROA1111,1,10.10,   0.0,    12,-, 10
 ROA0001,2,-10.240,600.300, -,12, 10
 ROA0002,3,600.300,1200.500, 12,0003, 10
 ROA0003,3,1200.500,1200.200, 0002,0004, 10
@@ -26,3 +27,5 @@ CON246, 11, 0005.0->0007.0, A
 CON000, 12, 0001.0->0002.0, A
 CON002, 12, 0001.1->0002.1, A
 CON003, 12, 0008.0->0002.2, A
+
+CON010, 12, 0008.0->1111.0, A

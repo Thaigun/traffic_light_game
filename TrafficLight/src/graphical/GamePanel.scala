@@ -11,6 +11,7 @@ import scala.swing.event._
 import scala.swing.event.Key._
 import java.awt.geom.Line2D
 import mapLogic.Constants
+import scala.swing.Dialog._
 
 class GamePanel(game: Game) extends Panel {
   this.requestFocusInWindow
@@ -22,11 +23,22 @@ class GamePanel(game: Game) extends Panel {
 
   this.background = Color.WHITE
 
+  def highScore = {
+    if (game.over && !game.resigned) {
+      val name = Dialog.showInput(parent = this, message = "Please enter your name for highscore", title = "Enter name", messageType = Message.Question, initial = "")
+      name match {
+        case Some(s) => game.fileReader.saveScore(new Score(game.goal, game.elapsed, name.get))
+        case None => game.fileReader.saveScore(new Score(game.goal, game.elapsed, "Anonymous"))
+      }
+      Dialog.showMessage(this, game.fileReader.readScores, "Scoreboard", Message.Plain)
+    }
+  }
+
   override def paintComponent(g: Graphics2D) = {
     val carGraphs = game.cars.map(_.graphic)
 
     g.setBackground(Color.white)
-    g.clearRect(0, 0, game.size._1, game.size._2)
+    g.clearRect(0, 0, this.size.getWidth.toInt, this.size.getHeight().toInt)
 
     for (road <- roads) {
       g.setColor(Constants.roadColor)
@@ -65,7 +77,11 @@ class GamePanel(game: Game) extends Panel {
     if (game.started != 0) {
       g.drawString("Time:  " + game.elapsed, 10, 60)
     }
-    g.drawString(System.currentTimeMillis().toString, 100, 100)
+
+    if (game.resigned) {
+      g.setFont(new Font(Font.SANS_SERIF, 0, 40))
+      g.drawString("Start again by clicking the Start-button!", 140, 60) //(this.size.getHeight()-20).toInt, (this.size.getWidth()-200).toInt)
+    }
 
   }
 

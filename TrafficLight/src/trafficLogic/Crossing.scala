@@ -244,5 +244,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
   def laneFromTo(from: Lane, to: Road) = {
     lanes.find(lane => lane.in == from && lane.out.getRoad == to)
   }
+  
+  override def toString = "Crossing id "+id
 
 }

@@ -1,18 +1,17 @@
 package mapLogic
 
 import java.io._
+import scala.io._
 import java.awt.geom.Point2D
 import scala.collection.mutable.Buffer
 import scala.io._
 import trafficLogic._
 import scala.Predef._
 
-/*
- * Roads: ROA0001, 2, 260.500, 900.500, -, 0002
- * Id, Number of lanes, starting coords, end coords, previous road, next road
- */
+
 class FileReader(game: Game) {
   var file: BufferedSource = null
+  var scorefile: String = ""
   val rowsInFile: Buffer[String] = Buffer()
 
   def setFile(newFile: BufferedSource): Unit = {
@@ -27,7 +26,33 @@ class FileReader(game: Game) {
       val nextLine = fileReader.next.replaceAllLiterally(" ", "").takeWhile(_ != '#').toLowerCase()
       if (!nextLine.isEmpty()) rowsInFile += nextLine
     }
-
+  }
+  
+  def readScores = {
+    val scoreReader = Source.fromFile("src/highscore.txt").getLines
+    val scoreStrings = Buffer[String]()
+    while (scoreReader.hasNext) {
+      val nextScoreLine = scoreReader.next.replaceAllLiterally(" ", "").takeWhile(_ != '#')
+      if (!nextScoreLine.isEmpty) scoreStrings += nextScoreLine
+    }
+    val scoreBuffer = scoreStrings.map(s => new Score(s.split(',')(0).toInt, s.split(',')(1).toDouble, s.split(',')(2)))
+    val first10 = scoreBuffer.sortBy(_.time).take(10)
+    var str = "Number of cars, time, name \n"
+    first10.foreach(score => str = str + (first10.indexOf(score)+1)+".  "+score.cars.toString + " cars,  "+score.time.toString+ " seconds,  "+score.name+'\n' )
+    str
+  }
+  /*
+   * Inspiration and code from http://stackoverflow.com/a/14819549/3280244  5.5.2014
+   */
+  def saveScore(s: Score) = {
+    //Looks horrible, surely could be done much better
+    val string = Source.fromFile(scorefile).getLines.foldLeft("")((str, s) => str + s + '\n') + s.cars.toString + ", "+s.time.toString+ ", "+s.name+ "\n"
+    val pw = new PrintWriter(new File(scorefile))
+    try {
+      pw.write(string)
+    } finally {
+      pw.close()
+    }    
   }
   
   def read = {

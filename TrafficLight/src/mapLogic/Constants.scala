@@ -28,6 +28,9 @@ object Constants {
    
    def getRoadWeighted(roads: Array[Road]) = {
      val totalSum = roads.map(_.weight).sum
+     roads.foreach(println(_))
+     println(totalSum)
+     println
      val rand = new scala.util.Random()
      val hit = rand.nextInt(totalSum)
      

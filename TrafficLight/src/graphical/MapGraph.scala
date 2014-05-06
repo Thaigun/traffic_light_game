@@ -9,9 +9,8 @@ object MapGraph extends SimpleSwingApplication {
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
   val game = new Game
-  game.gameFile = Source.fromFile("src/gamefile.txt")
   game.readFile
-  val gameThread = new Thread(game)
+  var gameThread = new Thread(game)
   val gamePanel = new GamePanel(game)
   game.panel = gamePanel
 
@@ -20,7 +19,10 @@ object MapGraph extends SimpleSwingApplication {
       def apply = {
         /*Start the game-related processing in a new thread*/
         try {
-          gameThread.start()
+          if (!gameThread.isAlive()) {
+            gameThread = new Thread(game)
+            gameThread.start()
+          }
         } catch {
           case _: Throwable =>
         }

@@ -226,12 +226,6 @@ class Car(game: Game, firstGoal: NavGoal) {
     if (this.passedPoint(nextLeg) || this.navGoal.kind == NavGoal.greenLights || this.navGoal.kind == NavGoal.redLights) {
       game.findNextLeg(this)
     }
-    
-    if(road.get.id == "0003" && this.currentLane.get != this.targetLane.get) {
-      println
-      println("current " +currentLane.get)
-      println("target "+targetLane.get)
-    }
 
     if (this.currentLane.get != this.targetLane.get) {
       this.navGoal.kind = NavGoal.laneSwitch

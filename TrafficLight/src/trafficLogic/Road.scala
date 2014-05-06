@@ -112,8 +112,11 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
    * Returns which lane of the current road should be taken to get to another road if the car  is currently on given lane.
    */
   def whichLaneFor(current: Lane, road: Road): Option[Lane] = {
-    if (!hasNextRoad && !hasNextCross) return None
-    
+    if (!hasNextRoad && !hasNextCross) {
+      if(current.getRoad.id == "0001") println ( "!hasNextRoad && !hasNextCross" )
+      return None
+    }
+
     if (hasNextRoad && nextRoad.get == road) {
       if (road.leftIsTouching) {
         if (current.laneNumber <= road.numOfLanes - 1) return Some(current) else return current.laneLeft
@@ -121,9 +124,9 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
         val thisRev = lanes.reverse
         val otherRev = road.lanes.reverse
         val i = numOfLanes - current.laneNumber - 1
-        if (i < otherRev.size) Some(thisRev(i)) else Some(thisRev(i-1))
+        if (i < otherRev.size) Some(thisRev(i)) else Some(thisRev(i - 1))
       }
-      
+
     } else if (hasNextRoad) {
       None
     } else {
@@ -134,17 +137,19 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     }
   }
 
-  def startsFromEdge = !hasPrevRoad && !hasPrevCross// && (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
-  def endsToEdge = (!hasNextRoad && !hasNextCross)//  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
-  
+  def startsFromEdge = (!hasPrevRoad && !hasPrevCross) || (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
+  def endsToEdge = (!hasNextRoad && !hasNextCross) ||  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
+
   /**
    * Finds the next road that could be aimed to from this road. Depends on the defined weight of each possible road
    */
   def raffleNextRoad: Option[Road] = {
     if (this.hasNextRoad) return this.nextRoad
-    val possible = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
+    val allOut = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
+    val possible = allOut.filter(r => nextCrossing.get.lanes.exists((lane: CrossingLane) => lane.in.getRoad == this && lane.out.getRoad == r))
+    println(id)
     Some(Constants.getRoadWeighted(possible))
   }
-  
-  override def toString = "Road id "+id+" having next crossing: "+hasNextCross+ " or nextRoad: "+hasNextRoad
+
+  override def toString = "Road id " + id + " having next crossing: " + hasNextCross + " or nextRoad: " + hasNextRoad
 }

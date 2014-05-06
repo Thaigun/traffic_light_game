@@ -23,14 +23,14 @@ class Game extends Runnable {
   var size: (Int, Int) = (0, 0)
 
   /*
-   * The gameFile is not passed to the fileReader as a constructor param, because we might want to re-init the game with the same map. In
-   * that case it is better to have the file saved in a different variable.
+   * Initialize the file reader and read the game file.
    */
-  var gameFile: BufferedSource = null
+  var gameFile: BufferedSource = Source.fromFile("src/gamefile.txt")
   val fileReader = new FileReader(this)
+  fileReader.setFile(gameFile)
+  fileReader.scorefile = "src/highscore.txt"
   def readFile() {
     if (gameFile == null) throw new Exception("You must choose the game file first!")
-    fileReader.setFile(gameFile)
 
     fileReader.read
 
@@ -65,13 +65,13 @@ class Game extends Runnable {
       currentLane = Some(lane)
       navGoal = goal
       nextRoad = next
-      
+
     }
     if (whichRoad.hasNextCross) {
-        val nextcrossinglane =  whichRoad.nextCrossing.get.laneFromTo(car.targetLane.get, next.get)
-        car.nextCrossingLane = nextcrossinglane
+      val nextcrossinglane = whichRoad.nextCrossing.get.laneFromTo(car.targetLane.get, next.get)
+      car.nextCrossingLane = nextcrossinglane
     }
-    
+
     cars += car
 
   }
@@ -105,12 +105,19 @@ class Game extends Runnable {
   var score = 0
   var goal = 10
   var resigned = false
-  
+
   var started: Long = 0
-  def elapsed = (System.currentTimeMillis() - started) / 1000.0
+  private var totalTime = 0.0
+  def elapsed = {
+    if (!resigned && !over) (System.currentTimeMillis() - started) / 1000.0 else totalTime
+  }
 
   def run() = {
-    var started = System.currentTimeMillis()
+    cars.clear
+    score = 0
+    resigned = false
+
+    started = System.currentTimeMillis()
     var delta: Long = 0
     var time: Long = 0
     var lastCarCreated = System.currentTimeMillis()
@@ -137,10 +144,16 @@ class Game extends Runnable {
       gameRound
       delta = System.nanoTime - time
     }
+    totalTime = (System.currentTimeMillis() - started) / 1000.0
+    panel.repaint
+    panel.highScore
   }
 
+  /**
+   * Finds the next navigation goal for a car.
+   */
   def findNextLeg(car: Car): Unit = {
-    
+
     def handleGreen = {
       val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane"))
       if (crossLane.isEnabled && car.passedPoint(car.nextLeg)) {
@@ -155,7 +168,7 @@ class Game extends Runnable {
     }
 
     def handleRed = {
-      val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane, "+cars.indexOf(car)))
+      val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane, " + cars.indexOf(car)))
       if (crossLane.isEnabled) {
         car.navGoal.kind = NavGoal.greenLights
       }
@@ -164,16 +177,17 @@ class Game extends Runnable {
     def handleEnd = {
       try {
         if (car.passedPoint(car.nextLeg)) {
-        val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
-          kind = NavGoal.roadStart
+          val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
+            kind = NavGoal.roadStart
+          }
+          car.navGoal = newGoal
         }
-        car.navGoal = newGoal
-      }} catch {
+      } catch {
         case a: Throwable => {
-          println("current "+car.currentLane.isDefined)
-          if (car.currentLane.isDefined) println("current next "+car.currentLane.get.nextLane.isDefined)
-          println("next road "+car.hasNextRoad)
-          println("Error caused by : "+car)
+          println("current " + car.currentLane.isDefined)
+          if (car.currentLane.isDefined) println("current next " + car.currentLane.get.nextLane.isDefined)
+          println("next road " + car.hasNextRoad)
+          println("Error caused by : " + car)
           throw a
         }
       }
@@ -186,13 +200,13 @@ class Game extends Runnable {
       if (road.endsToEdge) newGoal.kind = NavGoal.goal
       else if (road.hasNextCross) newGoal.kind = NavGoal.redLights
       else if (road.hasNextRoad) newGoal.kind = NavGoal.roadEnd
-     
+
       car.navGoal = newGoal
-      
+
       car.currentCrossingLane = None
       car.currentLane = Some(lane)
       car.nextRoad = car.road.get.raffleNextRoad
-      
+
       if (road.hasNextCross) {
         car.nextCrossingLane = car.nextCrossing.get.laneFromTo(car.currentLane.get, car.nextRoad.get)
       } else {
@@ -201,7 +215,7 @@ class Game extends Runnable {
     }
 
     def handleGoal = {
-      
+
     }
 
     def handleSwitch = {
@@ -210,7 +224,7 @@ class Game extends Runnable {
         if (car.road.get.hasNextRoad) car.navGoal.kind = NavGoal.roadEnd
         else if (car.road.get.hasNextCross) car.navGoal.kind = NavGoal.redLights
         else if (car.road.get.endsToEdge) car.navGoal.kind = NavGoal.goal
-        
+
       }
     }
 
