@@ -32,7 +32,7 @@ class CrossingLaneGraph(lane: CrossingLane) {
   val transform = new AffineTransform()
   transform.translate(midPoint.x, midPoint.y)
   val ptDistance = fromPt distance toPt
-  val scale = ptDistance / 12.0 // 12 because it's the length of the arrow polygon.
+  val scale = ptDistance / 12.0
   transform.scale(scale, 2)
   transform.rotate(rotate)
 
