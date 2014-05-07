@@ -129,7 +129,7 @@ class Game extends Runnable {
       if (cars.size < Constants.carNumber && System.currentTimeMillis() - lastCarCreated > 1000) {
         createCar
         lastCarCreated = System.currentTimeMillis()
-      } else if (System.currentTimeMillis() - lastCarCreated > 20000) {
+      } else if (System.currentTimeMillis() - lastCarCreated > 8000) {
         createCar
         lastCarCreated = System.currentTimeMillis()
       }

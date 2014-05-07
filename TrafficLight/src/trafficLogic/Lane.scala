@@ -10,7 +10,7 @@ import mapLogic.Constants
  @param road: The road that this lane belongs to
  @param laneNumber: The number of this lane in corresponding road, counted from left.
  */
-class Lane(road: Road, val laneNumber: Int) {
+class Lane(val road: Road, val laneNumber: Int) {
   lazy val previousLane: Option[Lane] = if (road.previousRoad.isDefined) road.previousRoad.get.lanes.find(_.nextLane.get == this) else  None
   lazy val nextLane: Option[Lane] = findNextLane
   lazy val laneLeft: Option[Lane] = road(laneNumber - 1)

@@ -7,7 +7,7 @@ import scala.math._
 import trafficLogic._
 
 object Constants {
-   val laneWidth = 40
+   val laneWidth = 30
    val trafLineColor = Color.yellow
    val roadColor = Color.LIGHT_GRAY
    val maxSpeed = 100
@@ -17,7 +17,7 @@ object Constants {
    val preferredGap = laneWidth / 3.5
    
    /*From file*/
-   val carNumber = 10
+   val carNumber = 20
    /*--------*/
    
    def angle(a: Point2D.Double, b: Point2D.Double): Double = {

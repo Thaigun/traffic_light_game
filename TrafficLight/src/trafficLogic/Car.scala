@@ -57,29 +57,20 @@ class Car(game: Game, firstGoal: NavGoal) {
     override def toString() = "velocity: " + velocity + "\n, direction: " + direction
   }
 
-  val length: Double = randomLength()
+  val length: Double = getLength()
   val width: Double = widthForLength()
-  val mass: Double = massForDimensions()
-  val maxAcceleration: Double = randomAcceleration
-  val break = randomBreak
+  val break = breaking
 
-  def randomBreak = {
+  def breaking = {
     -50
   }
 
-  def randomAcceleration = {
-    25
-  }
-  def randomLength(): Double = {
+  def getLength(): Double = {
     1.0 * Constants.laneWidth //Dummy value for now, will be random.
   }
 
   def widthForLength(): Double = {
-    0.5 * Constants.laneWidth //Dummy value for now, will be random.
-  }
-
-  def massForDimensions(): Double = {
-    1000 //Dummy value for now, will be random.
+    0.5 * length //Dummy value for now, will be random.
   }
 
   def direction = speed.direction
@@ -129,7 +120,7 @@ class Car(game: Game, firstGoal: NavGoal) {
     } else { false }
   }
 
-  def stoppingDistance(forVelocity: Double = velocity) = 0.5 * velocity * velocity / -break
+  def stoppingDistance(forVelocity: Double = velocity) = 0.5 * forVelocity * forVelocity / -break
 
   lazy val graphic = new CarGraph(this)
 
@@ -137,7 +128,6 @@ class Car(game: Game, firstGoal: NavGoal) {
   def road: Option[Road] = Some(currentLane.getOrElse(return None).getRoad)
 
   def nextCrossing: Option[Crossing] = navGoal.onRoad.nextCrossing
-  def nextCrossLane: Option[CrossingLane] = nextCrossing.getOrElse(return None).laneFromTo(currentLane.get, nextRoad.get)
   /*
    * Has the car gone past some point. This is used to tell when to set the next leg.
    */
@@ -227,12 +217,16 @@ class Car(game: Game, firstGoal: NavGoal) {
     val dy = sin(direction) * velocity * sec
     location = new Point2D.Double(x + dx, y + dy)
 
-    
 
   }
 
   def steerTowards(pt: Point2D.Double, time: Double) = {
-    val desiredVelocity = Constants.maxSpeed
+    val desiredVelocity = if (this.currentCrossingLane.isDefined)  {
+      Constants.maxSpeed * (this.currentCrossingLane.get.length / max(this.currentCrossingLane.get.crossing.width, this.currentCrossingLane.get.crossing.height))
+    } else if (this.navGoal.kind == NavGoal.greenLights && location.distance(nextLeg) < stoppingDistance()){
+      Constants.maxSpeed * (this.nextCrossingLane.get.length / max(this.nextCrossingLane.get.crossing.width, this.nextCrossingLane.get.crossing.height))
+    } else { Constants.maxSpeed }
+    
     val midPoint = currentLane.get.pointAtDistance(location.distance(currentLane.get.startM))
     if ((location distance midPoint) > Constants.laneWidth * 0.15 && navGoal.kind != NavGoal.roadStart) {
       val vectorToMiddle = new SpeedVector(location.distance(midPoint), Constants.angle(location, midPoint))
@@ -247,7 +241,7 @@ class Car(game: Game, firstGoal: NavGoal) {
   //Returns a boolean value indicating if the vehicle has arrived to the destination
   def arriveTowards(pt: Point2D.Double, time: Double) = {
     val distance = (pt distance location) - Constants.preferredGap - length / 2
-    val speedForDistance = (10 / Constants.maxSpeed) * (sqrt(2 * (distance) * -break)) //Constants.maxSpeed * ((pt distance location)*0.9) / this.stoppingDistance(Constants.maxSpeed)
+    val speedForDistance = (10 / Constants.maxSpeed) * (sqrt(2 * (distance) * -break))
     val desiredVelocity = min(Constants.maxSpeed, speedForDistance)
     val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
     speed.steerFor(desiredSpeed, time)
