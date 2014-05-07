@@ -28,7 +28,11 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
     var roadI: Option[Road] = None
     def tryAddIn(road: Road) = {
       val dirIn = if (road.hasPrevRoad) {
-        Constants.angle(location, road.previousRoad.get.endM)
+        val compareAng = if ((this.left distance road.previousRoad.get.end )<=(this.right distance road.previousRoad.get.end)) moreThan else lessThan
+        val normal = compareAng - Pi/2
+        val relevantEndM = new Point2D.Double(road.previousRoad.get.end.getX() + cos(normal)*road.previousRoad.get.numOfLanes*Constants.laneWidth,
+            road.previousRoad.get.end.getY() + sin(normal)*road.previousRoad.get.numOfLanes*Constants.laneWidth)
+        Constants.angle(location, relevantEndM)
       } else {
         Constants.angle(location, road.start)
       }

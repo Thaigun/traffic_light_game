@@ -3,15 +3,10 @@ package graphical
 import mapLogic._
 import java.awt.image.ImageObserver
 import java.awt.Font
-import java.awt.geom.Rectangle2D
 import trafficLogic._
 import scala.collection.mutable.Buffer
 import scala.swing._
 import java.awt.Color
-import scala.swing.event._
-import scala.swing.event.Key._
-import java.awt.geom.Line2D
-import mapLogic.Constants
 import scala.swing.Dialog._
 import java.awt.BasicStroke
 

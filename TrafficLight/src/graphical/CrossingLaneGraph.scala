@@ -17,31 +17,32 @@ class CrossingLaneGraph(lane: CrossingLane) {
   def fromPt = lane.start
   def toPt = lane.end  
 
-  val arrowPolygon = new Polygon()
-  arrowPolygon.addPoint(-6, 1)
-  arrowPolygon.addPoint(3, 1)
-  arrowPolygon.addPoint(3, 3)
-  arrowPolygon.addPoint(6, 0)
-  arrowPolygon.addPoint(3, -3)
-  arrowPolygon.addPoint(3, -1)
-  arrowPolygon.addPoint(-6, -1)
-
-  val midPoint = midpoint(fromPt, toPt)
-
-  val rotate = atan2(toPt.y - fromPt.y, toPt.x - fromPt.x)
-
-  val transform = new AffineTransform()
-  transform.translate(midPoint.x, midPoint.y)
-  val ptDistance = fromPt distance toPt
-  val scale = ptDistance / 12.0
-  transform.scale(scale, 2)
-  transform.rotate(rotate)
-
-  val arrow = transform.createTransformedShape(arrowPolygon)
-
-  private def midpoint(p1: Point2D.Double, p2: Point2D.Double) = {
-    new Point2D.Double((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0)
-  }
+  val arrow = new Line2D.Double(fromPt, toPt)
+//  val arrowPolygon = new Polygon()
+//  arrowPolygon.addPoint(-6, 1)
+//  arrowPolygon.addPoint(3, 1)
+//  arrowPolygon.addPoint(3, 3)
+//  arrowPolygon.addPoint(6, 0)
+//  arrowPolygon.addPoint(3, -3)
+//  arrowPolygon.addPoint(3, -1)
+//  arrowPolygon.addPoint(-6, -1)
+//
+//  val midPoint = midpoint(fromPt, toPt)
+//
+//  val rotate = atan2(toPt.y - fromPt.y, toPt.x - fromPt.x)
+//
+//  val transform = new AffineTransform()
+//  transform.translate(midPoint.x, midPoint.y)
+//  val ptDistance = fromPt distance toPt
+//  val scale = ptDistance / 12.0
+//  transform.scale(scale, 2)
+//  transform.rotate(rotate)
+//
+//  val arrow = transform.createTransformedShape(arrowPolygon)
+//
+//  private def midpoint(p1: Point2D.Double, p2: Point2D.Double) = {
+//    new Point2D.Double((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0)
+//  }
   
   def color = if (lane.isEnabled) Constants.greenLight else Constants.redLight
 }  

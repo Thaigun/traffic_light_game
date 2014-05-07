@@ -29,11 +29,11 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
         leftCorner
       } else {
         if (nextCrossing.get.rightEndIsTouching(this)) {
-          val sigma = Constants.angle(touchingCorner, nextCrossing.get.getEndingPointFor(this)) - Pi
+          val sigma = Constants.angle(touchingCorner, nextCrossing.get.getTouchingEndPointFor(this)) - Pi/2
           new Point2D.Double(touchingCorner.getX + cos(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY + sin(sigma) * Constants.laneWidth * numOfLanes)
         } else {
           val theta = Constants.angle(touchingCorner, nextCrossing.get.getEndingPointFor(this))
-          val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance new Point2D.Double(x2, y2)))
+          val alfa = asin((Constants.laneWidth * numOfLanes) / (touchingCorner distance nextCrossing.get.getEndingPointFor(this)))
           val sigma = theta + alfa
           val leftCorner = new Point2D.Double(touchingCorner.getX() + sin(sigma) * Constants.laneWidth * numOfLanes, touchingCorner.getY() - cos(sigma) * Constants.laneWidth * numOfLanes)
           leftCorner
@@ -137,8 +137,8 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     }
   }
 
-  def startsFromEdge = (!hasPrevRoad && !hasPrevCross) || (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
-  def endsToEdge = (!hasNextRoad && !hasNextCross) ||  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
+  def startsFromEdge = (!hasPrevRoad && !hasPrevCross)// || (startX <= 0 || startY <= 0 || startX >= game.size._1 || startY >= game.size._2)
+  def endsToEdge = (!hasNextRoad && !hasNextCross) //||  (end.getX <= 0 || end.getY <= 0 || end.getX() >= game.size._1 || end.getY() >= game.size._2)
 
   /**
    * Finds the next road that could be aimed to from this road. Depends on the defined weight of each possible road

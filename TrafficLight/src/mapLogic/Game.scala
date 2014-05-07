@@ -32,9 +32,7 @@ class Game extends Runnable {
   fileReader.scorefile = "src/highscore.txt"
   def readFile() {
     if (gameFile == null) throw new Exception("You must choose the game file first!")
-
     fileReader.read
-
     check
   }
 
