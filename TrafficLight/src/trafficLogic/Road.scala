@@ -113,7 +113,6 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
    */
   def whichLaneFor(current: Lane, road: Road): Option[Lane] = {
     if (!hasNextRoad && !hasNextCross) {
-      if(current.getRoad.id == "0001") println ( "!hasNextRoad && !hasNextCross" )
       return None
     }
 
@@ -132,7 +131,8 @@ class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, sta
     } else {
       val crossing = nextCrossing.getOrElse(throw new Exception("Cannot find a crossingLane because there's no next Crossing"))
       if (crossing.lanes.exists(lane => lane.in == current && lane.out.getRoad == road)) return Some(current)
-      val crossingLane = crossing.lanes.find(_.out.getRoad == road).getOrElse(throw new Exception("The desired road " + road.id + " is not accessible from this road: " + id))
+      val crossingLane = crossing.lanes.find(lane => lane.out.getRoad == road && lane.in.getRoad == current.road).
+                            getOrElse(throw new Exception("The desired road " + road.id + " is not accessible from this road: " + id))
       this.lanes.find(_ == crossingLane.in)
     }
   }
