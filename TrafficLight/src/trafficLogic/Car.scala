@@ -66,11 +66,11 @@ class Car(game: Game, firstGoal: NavGoal) {
   }
 
   def getLength(): Double = {
-    1.0 * Constants.laneWidth //Dummy value for now, will be random.
+    1.0 * Constants.laneWidth
   }
 
   def widthForLength(): Double = {
-    0.5 * length //Dummy value for now, will be random.
+    0.5 * length
   }
 
   def direction = speed.direction
@@ -172,9 +172,9 @@ class Car(game: Game, firstGoal: NavGoal) {
    * @param time: Time since the last calculation in milliseconds
    */
   def calc(time: Long): Unit = {
-    
+
     if (this.passedPoint(nextLeg) || this.navGoal.kind == NavGoal.greenLights || this.navGoal.kind == NavGoal.redLights) {
-      game.findNextLeg(this)
+      findNextLeg
     }
 
     if (this.currentLane.get != this.targetLane.get) {
@@ -217,25 +217,20 @@ class Car(game: Game, firstGoal: NavGoal) {
     val dy = sin(direction) * velocity * sec
     location = new Point2D.Double(x + dx, y + dy)
 
-
   }
 
   def steerTowards(pt: Point2D.Double, time: Double) = {
-    val desiredVelocity = if (this.currentCrossingLane.isDefined)  {
+    //If the car is coming to - or is in - a crossing, the speed will be reduced 
+    val desiredVelocity = if (this.currentCrossingLane.isDefined) {
       Constants.maxSpeed * (this.currentCrossingLane.get.length / max(this.currentCrossingLane.get.crossing.width, this.currentCrossingLane.get.crossing.height))
-    } else if (this.navGoal.kind == NavGoal.greenLights && location.distance(nextLeg) < stoppingDistance()){
+    } else if (this.navGoal.kind == NavGoal.greenLights && location.distance(nextLeg) < stoppingDistance()) {
       Constants.maxSpeed * (this.nextCrossingLane.get.length / max(this.nextCrossingLane.get.crossing.width, this.nextCrossingLane.get.crossing.height))
     } else { Constants.maxSpeed }
-    
-    val midPoint = currentLane.get.pointAtDistance(location.distance(currentLane.get.startM))
-    if ((location distance midPoint) > Constants.laneWidth * 0.15 && navGoal.kind != NavGoal.roadStart) {
-      val vectorToMiddle = new SpeedVector(location.distance(midPoint), Constants.angle(location, midPoint))
-      val desiredSpeed = vectorToMiddle + new SpeedVector(desiredVelocity, Constants.angle(location, pt))
-      speed.steerFor(desiredSpeed, time)
-    } else {
-      val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
-      speed.steerFor(desiredSpeed, time)
-    }
+
+    //The car heads towards the middle of the lane (midPoint) if it's to far away from it.
+    val desiredSpeed = vectorTowardsMiddle + new SpeedVector(desiredVelocity, Constants.angle(location, pt))
+    speed.steerFor(desiredSpeed, time)
+
   }
 
   //Returns a boolean value indicating if the vehicle has arrived to the destination
@@ -243,8 +238,17 @@ class Car(game: Game, firstGoal: NavGoal) {
     val distance = (pt distance location) - Constants.preferredGap - length / 2
     val speedForDistance = (10 / Constants.maxSpeed) * (sqrt(2 * (distance) * -break))
     val desiredVelocity = min(Constants.maxSpeed, speedForDistance)
-    val desiredSpeed = new SpeedVector(desiredVelocity, Constants.angle(location, pt))
+    val desiredSpeed = vectorTowardsMiddle + new SpeedVector(desiredVelocity, Constants.angle(location, pt))
     speed.steerFor(desiredSpeed, time)
+  }
+
+  private def vectorTowardsMiddle = {
+    val midPoint = currentLane.get.pointAtDistance(location.distance(currentLane.get.startM))
+    if ((location distance midPoint) > Constants.laneWidth * 0.15 && navGoal.kind != NavGoal.roadStart) {
+      new SpeedVector(location.distance(midPoint), Constants.angle(location, midPoint))
+    } else {
+      new SpeedVector(0.0, road.get.rotation)
+    }
   }
 
   def isInScope(area: Shape) = {
@@ -276,8 +280,89 @@ class Car(game: Game, firstGoal: NavGoal) {
 
   override def toString = "Car no. " + (game.cars.indexOf(this) + 1) + " at " + location.getX() + ", " + location.getY()
 
-}
+  /**
+   * This method finds the next leg for this car after it has passed the previous one.
+   * The result depend on the previous goal's type (kind), next road's next road or crossing etc.
+   */
+  def findNextLeg(): Unit = {
 
+    def handleGreen = {
+      val crossLane = this.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane"))
+      if (crossLane.isEnabled && this.passedPoint(this.nextLeg)) {
+        val newGoal = new NavGoal(crossLane.out.startM.getX(), crossLane.out.startM.getY(), this.nextRoad.get) {
+          kind = NavGoal.roadStart
+        }
+        this.navGoal = newGoal
+        this.currentCrossingLane = Some(crossLane)
+      } else if (!crossLane.isEnabled && this.stoppingDistance() > this.location.distance(this.nextLeg)) {
+        this.navGoal.kind = NavGoal.redLights
+      }
+    }
+
+    def handleRed = {
+      val crossLane = this.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane, " + game.cars.indexOf(this)))
+      if (crossLane.isEnabled) {
+        this.navGoal.kind = NavGoal.greenLights
+      }
+    }
+
+    def handleEnd = {
+      if (this.passedPoint(this.nextLeg)) {
+        val newGoal = new NavGoal(this.currentLane.get.nextLane.get.startM.getX(), this.currentLane.get.nextLane.get.startM.getY(), this.nextRoad.get) {
+          kind = NavGoal.roadStart
+        }
+        this.navGoal = newGoal
+      }
+    }
+
+    def handleStart = {
+      val road = this.nextRoad.get
+      val lane = if (this.hasCurrentCross) this.currentCrossingLane.get.out else this.currentLane.get.nextLane.get
+      // A point a little before the lanes end, this makes the steering behavior more realistic and prevents from collisions in crossings
+      val goalPoint = lane.navEndPoint
+      val newGoal = NavGoal(goalPoint, road)
+      if (road.endsToEdge) newGoal.kind = NavGoal.goal
+      else if (road.hasNextCross) newGoal.kind = NavGoal.redLights
+      else if (road.hasNextRoad) newGoal.kind = NavGoal.roadEnd
+
+      this.navGoal = newGoal
+
+      this.currentCrossingLane = None
+      this.currentLane = Some(lane)
+      this.nextRoad = this.road.get.raffleNextRoad
+
+      if (road.hasNextCross) {
+        this.nextCrossingLane = this.nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
+      } else {
+        this.nextCrossingLane = None
+      }
+    }
+
+    def handleGoal = {
+
+    }
+
+    def handleSwitch = {
+      if (this.navGoal.kind == NavGoal.laneSwitch && this.passedPoint(this.nextLeg)) {
+        this.navGoal.position = this.currentLane.get.navEndPoint
+        if (this.road.get.hasNextRoad) this.navGoal.kind = NavGoal.roadEnd
+        else if (this.road.get.hasNextCross) this.navGoal.kind = NavGoal.redLights
+        else if (this.road.get.endsToEdge) this.navGoal.kind = NavGoal.goal
+
+      }
+    }
+
+    this.navGoal.kind match {
+      case NavGoal.greenLights => handleGreen
+      case NavGoal.redLights => handleRed
+      case NavGoal.roadEnd => handleEnd
+      case NavGoal.roadStart => handleStart
+      case NavGoal.goal => handleGoal
+      case NavGoal.laneSwitch => handleSwitch
+    }
+  }
+  
+}
 object Car extends Enumeration {
   type Steering = Value
   val Seek, Arrive = Value

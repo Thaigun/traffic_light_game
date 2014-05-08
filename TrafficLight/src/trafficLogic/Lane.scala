@@ -49,5 +49,7 @@ class Lane(val road: Road, val laneNumber: Int) {
     }
   }
   
+  def navEndPoint = pointAtDistance(road.length - Constants.laneWidth/2)
+  
   override def toString = "Lane number: "+laneNumber+", road: "+road.id
 }

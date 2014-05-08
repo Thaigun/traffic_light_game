@@ -12,11 +12,8 @@ import scala.math._
 
 class Game extends Runnable {
 
-  /* We're using immutable Vector as variable instead of mutable fixed value, because it will remain the same once initialized
-   * Roads are added based on the file.
-   * The variable cars will be initialized based on the number of cars defined in the file.
-   * Same applies to the crossings.
-   */
+  var panel: GamePanel = null // Will be initialized in readFile
+  
   var roads: Array[Road] = Array()
   var cars: Buffer[Car] = Buffer()
   var crossings: Array[Crossing] = Array()
@@ -33,6 +30,7 @@ class Game extends Runnable {
   def readFile() {
     if (gameFile == null) throw new Exception("You must choose the game file first!")
     fileReader.read
+    panel = new GamePanel(this)
     check
   }
 
@@ -75,7 +73,7 @@ class Game extends Runnable {
       car.nextCrossingLane = nextcrossinglane
     }
     
-    car.navGoal.position = lane.pointAtDistance(lane.road.length - car.length / 2)
+    car.navGoal.position = lane.navEndPoint
 
     cars += car
 
@@ -106,7 +104,6 @@ class Game extends Runnable {
   def check = {}
 
   def over = score >= goal
-  var panel: GamePanel = null
   var score = 0
   var goal = 10
   var carNumber = 10
@@ -119,6 +116,7 @@ class Game extends Runnable {
   }
 
   def run() = {
+    buttons.foreach(_.listenTo(panel.mouse.clicks))
     cars.clear
     score = 0
     resigned = false
@@ -153,86 +151,5 @@ class Game extends Runnable {
     totalTime = (System.currentTimeMillis() - started) / 1000.0
     panel.repaint
     panel.highScore
-  }
-
-  /**
-   * Finds the next navigation goal for a car.
-   */
-  def findNextLeg(car: Car): Unit = {
-
-    def handleGreen = {
-      val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane"))
-      if (crossLane.isEnabled && car.passedPoint(car.nextLeg)) {
-        val newGoal = new NavGoal(crossLane.out.startM.getX(), crossLane.out.startM.getY(), car.nextRoad.get) {
-          kind = NavGoal.roadStart
-        }
-        car.navGoal = newGoal
-        car.currentCrossingLane = Some(crossLane)
-      } else if (!crossLane.isEnabled && car.stoppingDistance() > car.location.distance(car.nextLeg)) {
-        car.navGoal.kind = NavGoal.redLights
-      }
-    }
-
-    def handleRed = {
-      val crossLane = car.nextCrossingLane.getOrElse(throw new Exception("A car did not find the next CrossingLane, " + cars.indexOf(car)))
-      if (crossLane.isEnabled) {
-        car.navGoal.kind = NavGoal.greenLights
-      }
-    }
-
-    def handleEnd = {
-      if (car.passedPoint(car.nextLeg)) {
-        val newGoal = new NavGoal(car.currentLane.get.nextLane.get.startM.getX(), car.currentLane.get.nextLane.get.startM.getY(), car.nextRoad.get) {
-          kind = NavGoal.roadStart
-        }
-        car.navGoal = newGoal
-      }
-    }
-
-    def handleStart = {
-      val road = car.nextRoad.get
-      val lane = if (car.hasCurrentCross) car.currentCrossingLane.get.out else car.currentLane.get.nextLane.get
-      // A point a little before the lanes end, this makes the steering behavior more realistic and prevents from collisions in crossings
-      val goalPoint = lane.pointAtDistance(lane.road.length - car.length / 2)
-      val newGoal = NavGoal(goalPoint, road)
-      if (road.endsToEdge) newGoal.kind = NavGoal.goal
-      else if (road.hasNextCross) newGoal.kind = NavGoal.redLights
-      else if (road.hasNextRoad) newGoal.kind = NavGoal.roadEnd
-
-      car.navGoal = newGoal
-
-      car.currentCrossingLane = None
-      car.currentLane = Some(lane)
-      car.nextRoad = car.road.get.raffleNextRoad
-
-      if (road.hasNextCross) {
-        car.nextCrossingLane = car.nextCrossing.get.laneFromTo(car.currentLane.get, car.nextRoad.get)
-      } else {
-        car.nextCrossingLane = None
-      }
-    }
-
-    def handleGoal = {
-
-    }
-
-    def handleSwitch = {
-      if (car.navGoal.kind == NavGoal.laneSwitch && car.passedPoint(car.nextLeg)) {
-        car.navGoal.position = car.currentLane.get.pointAtDistance(car.currentLane.get.road.length - car.length / 2)
-        if (car.road.get.hasNextRoad) car.navGoal.kind = NavGoal.roadEnd
-        else if (car.road.get.hasNextCross) car.navGoal.kind = NavGoal.redLights
-        else if (car.road.get.endsToEdge) car.navGoal.kind = NavGoal.goal
-
-      }
-    }
-
-    car.navGoal.kind match {
-      case NavGoal.greenLights => handleGreen
-      case NavGoal.redLights => handleRed
-      case NavGoal.roadEnd => handleEnd
-      case NavGoal.roadStart => handleStart
-      case NavGoal.goal => handleGoal
-      case NavGoal.laneSwitch => handleSwitch
-    }
   }
 }

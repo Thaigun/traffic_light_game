@@ -224,13 +224,6 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
       val sigma = Pi / 2 - alfa - theta
       val leftCorner = new Point2D.Double(touchPoint.getX - sin(sigma) * Constants.laneWidth * road.numOfLanes, touchPoint.getY - cos(sigma) * Constants.laneWidth * road.numOfLanes)
       leftCorner
-      //      } else if (side.side == 'r') {
-      //        
-      //      } else if (side.side == 'u') {
-      //
-      //      } else /*side.side=='d'*/ {
-      //
-      //      }
     }
   }
 

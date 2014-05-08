@@ -6,7 +6,7 @@ import graphical._
 import scala.math._
 import mapLogic.Constants
 
-class Road(val game: Game, val id: String, val numOfLanes: Int)(startX: Int, startY: Int)(private val x2: Int, private val y2: Int) {
+class Road(val id: String, val numOfLanes: Int)(startX: Int, startY: Int)(private val x2: Int, private val y2: Int) {
   def apply(n: Int): Option[Lane] = if (n >= 0 && lanes.size > n) Some(lanes(n)) else None
   def right: Lane = this(numOfLanes - 1).get
   def left: Lane = this(0).get
