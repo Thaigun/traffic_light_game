@@ -61,6 +61,7 @@ class FileReader(game: Game) {
     game.setRoads(getRoads)
     buildCrossings(game.crossings)
     game.goal = findGoal
+    game.carNumber = this.carNumber
     game.addThumbnails(thumbnails)
   }
 
@@ -141,9 +142,6 @@ class FileReader(game: Game) {
         nextCr addRoadIn road
       }
     }
-
-    
-    
     roads
   }
 
@@ -155,6 +153,10 @@ class FileReader(game: Game) {
     for (cross <- arr) {
       cross.build
     }
+  }
+  
+  def carNumber: Int = {
+    rowsInFile.find(_.startsWith("num")).getOrElse(return 10).drop(3).toInt
   }
 
   def thumbnails = {

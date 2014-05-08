@@ -16,10 +16,6 @@ object Constants {
    
    val preferredGap = laneWidth / 3.5
    
-   /*From file*/
-   val carNumber = 35
-   /*--------*/
-   
    def angle(a: Point2D.Double, b: Point2D.Double): Double = {
      if ((a distance b) == 0.0) return 0
      if (b.getY-a.getY >= 0) acos((b.getX-a.getX) / (a distance b)) else -acos((b.getX-a.getX) / (a distance b))

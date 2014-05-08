@@ -74,6 +74,8 @@ class Game extends Runnable {
       val nextcrossinglane = whichRoad.nextCrossing.get.laneFromTo(car.targetLane.get, next.get)
       car.nextCrossingLane = nextcrossinglane
     }
+    
+    car.navGoal.position = lane.pointAtDistance(lane.road.length - car.length / 2)
 
     cars += car
 
@@ -107,6 +109,7 @@ class Game extends Runnable {
   var panel: GamePanel = null
   var score = 0
   var goal = 10
+  var carNumber = 10
   var resigned = false
 
   var started: Long = 0
@@ -126,7 +129,7 @@ class Game extends Runnable {
     var lastCarCreated = System.currentTimeMillis()
 
     def gameRound = {
-      if (cars.size < Constants.carNumber && System.currentTimeMillis() - lastCarCreated > 1000) {
+      if (cars.size < carNumber && System.currentTimeMillis() - lastCarCreated > 1000) {
         createCar
         lastCarCreated = System.currentTimeMillis()
       } else if (System.currentTimeMillis() - lastCarCreated > 8000) {
@@ -189,7 +192,9 @@ class Game extends Runnable {
     def handleStart = {
       val road = car.nextRoad.get
       val lane = if (car.hasCurrentCross) car.currentCrossingLane.get.out else car.currentLane.get.nextLane.get
-      val newGoal = NavGoal(lane.endM, road)
+      // A point a little before the lanes end, this makes the steering behavior more realistic and prevents from collisions in crossings
+      val goalPoint = lane.pointAtDistance(lane.road.length - car.length / 2)
+      val newGoal = NavGoal(goalPoint, road)
       if (road.endsToEdge) newGoal.kind = NavGoal.goal
       else if (road.hasNextCross) newGoal.kind = NavGoal.redLights
       else if (road.hasNextRoad) newGoal.kind = NavGoal.roadEnd
@@ -213,7 +218,7 @@ class Game extends Runnable {
 
     def handleSwitch = {
       if (car.navGoal.kind == NavGoal.laneSwitch && car.passedPoint(car.nextLeg)) {
-        car.navGoal.position = car.currentLane.get.endM
+        car.navGoal.position = car.currentLane.get.pointAtDistance(car.currentLane.get.road.length - car.length / 2)
         if (car.road.get.hasNextRoad) car.navGoal.kind = NavGoal.roadEnd
         else if (car.road.get.hasNextCross) car.navGoal.kind = NavGoal.redLights
         else if (car.road.get.endsToEdge) car.navGoal.kind = NavGoal.goal
