@@ -5,6 +5,9 @@ import scala.io.Source
 import mapLogic._
 import javax.swing.UIManager
 
+import javax.sound._
+import javax.sound.sampled._
+
 object MapGraph extends SimpleSwingApplication {
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
@@ -13,7 +16,7 @@ object MapGraph extends SimpleSwingApplication {
   var gameThread = new Thread(game)
   val gamePanel = new GamePanel(game)
   game.panel = gamePanel
-  
+
   val startButton = new Button("Start Game") {
     action = new Action("Start Game") {
       def apply = {

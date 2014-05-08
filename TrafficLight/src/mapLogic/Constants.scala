@@ -17,7 +17,7 @@ object Constants {
    val preferredGap = laneWidth / 3.5
    
    /*From file*/
-   val carNumber = 20
+   val carNumber = 35
    /*--------*/
    
    def angle(a: Point2D.Double, b: Point2D.Double): Double = {

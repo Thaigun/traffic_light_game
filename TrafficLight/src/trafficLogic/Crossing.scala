@@ -159,7 +159,7 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
   private var currentCombo: Char = combinations.head
   def getCurrentCombo = currentCombo
   def setNewCombo(c: Char) = {
-    previousCombo = Some(currentCombo)
+    if (c != currentCombo) previousCombo = Some(currentCombo)
     currentCombo = c
     val timerAction = new AbstractAction() {
       def actionPerformed(event: ActionEvent): Unit = previousCombo = None

@@ -9,6 +9,7 @@ import scala.swing._
 import java.awt.Color
 import scala.swing.Dialog._
 import java.awt.BasicStroke
+import scala.swing.event._
 
 class GamePanel(game: Game) extends Panel with ImageObserver {
   this.requestFocusInWindow

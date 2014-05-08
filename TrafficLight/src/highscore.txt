@@ -1,11 +1,5 @@
 #HighScores#
 # Number of cars # Time # Player ##
-10, 43.859, Antti
-1, 7.166, Antti
-1, 5.15, Antti
-1, 7.168, Antti
-1, 24.967, Taina
-30, 63.302, Antti
-30, 89.053, Antti
-30, 54.882, Antti
-30, 64.17, Anonymous
+
+30, 67.216, Antti
+30, 62.365, Antti
