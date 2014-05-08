@@ -6,8 +6,7 @@ import scala.swing._
 import scala.swing.event._
 import javax.swing.ImageIcon
 
-class CrossingButton(crossing: Crossing, combo: Char, val point: Point2D.Double, imgSrc: String) extends Label/* with Publisher*/ {
-  val roadsOfCrossing = (crossing.roadsIn ++ crossing.roadsOut)
+class CrossingButton(crossing: Crossing, combo: Char, val point: Point2D.Double, imgSrc: String) extends Label {
   reactions += {
     case click: MousePressed => changeCombo(click.point)
   }

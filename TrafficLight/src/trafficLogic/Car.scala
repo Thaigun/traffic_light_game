@@ -61,17 +61,11 @@ class Car(game: Game, firstGoal: NavGoal) {
   val width: Double = widthForLength()
   val break = breaking
 
-  def breaking = {
-    -50
-  }
+  def breaking = -50
 
-  def getLength(): Double = {
-    1.0 * Constants.laneWidth
-  }
+  def getLength(): Double = 1.0 * Constants.laneWidth
 
-  def widthForLength(): Double = {
-    0.5 * length
-  }
+  def widthForLength(): Double = 0.5 * length
 
   def direction = speed.direction
   def velocity = speed.velocity
@@ -120,6 +114,9 @@ class Car(game: Game, firstGoal: NavGoal) {
     } else { false }
   }
 
+  /*
+   * Space needed to stop from a given speed.
+   */
   def stoppingDistance(forVelocity: Double = velocity) = 0.5 * forVelocity * forVelocity / -break
 
   lazy val graphic = new CarGraph(this)
@@ -153,6 +150,9 @@ class Car(game: Game, firstGoal: NavGoal) {
   protected def getScopeStart(wider: Double) = {
     new Point2D.Double(frontLocation.getX() + sin(direction) * wider, frontLocation.getY() - cos(direction) * wider)
   }
+  /*
+   * The scope that the car observes to avoid other cars.
+   */
   def scope = {
     //How much the area is wider than the car
     val wider = width * 0.2
@@ -219,6 +219,9 @@ class Car(game: Game, firstGoal: NavGoal) {
 
   }
 
+  /*
+   * AccelVector for driving through a desired point
+   */
   def steerTowards(pt: Point2D.Double, time: Double) = {
     //If the car is coming to - or is in - a crossing, the speed will be reduced 
     val desiredVelocity = if (this.currentCrossingLane.isDefined) {
@@ -233,7 +236,9 @@ class Car(game: Game, firstGoal: NavGoal) {
 
   }
 
-  //Returns a boolean value indicating if the vehicle has arrived to the destination
+  /*
+   * AccelVector for arriving to the desired point
+   */
   def arriveTowards(pt: Point2D.Double, time: Double) = {
     val distance = (pt distance location) - Constants.preferredGap - length / 2
     val speedForDistance = (10 / Constants.maxSpeed) * (sqrt(2 * (distance) * -break))
@@ -242,6 +247,9 @@ class Car(game: Game, firstGoal: NavGoal) {
     speed.steerFor(desiredSpeed, time)
   }
 
+  /*
+   * SpeedVector that leads towards the middle of the current lane
+   */
   private def vectorTowardsMiddle = {
     val midPoint = currentLane.get.pointAtDistance(location.distance(currentLane.get.startM))
     if ((location distance midPoint) > Constants.laneWidth * 0.15 && navGoal.kind != NavGoal.roadStart) {
