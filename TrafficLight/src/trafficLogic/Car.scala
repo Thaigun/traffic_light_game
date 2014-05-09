@@ -226,8 +226,6 @@ class Car(game: Game, firstGoal: NavGoal) {
     //If the car is coming to - or is in - a crossing, the speed will be reduced 
     val desiredVelocity = if (this.currentCrossingLane.isDefined) {
       Constants.maxSpeed * (this.currentCrossingLane.get.length / max(this.currentCrossingLane.get.crossing.width, this.currentCrossingLane.get.crossing.height))
-    } else if (this.navGoal.kind == NavGoal.greenLights && location.distance(nextLeg) < stoppingDistance()) {
-      Constants.maxSpeed * (this.nextCrossingLane.get.length / max(this.nextCrossingLane.get.crossing.width, this.nextCrossingLane.get.crossing.height))
     } else { Constants.maxSpeed }
 
     //The car heads towards the middle of the lane (midPoint) if it's to far away from it.
