@@ -11,7 +11,7 @@ import javax.sound.sampled._
 object MapGraph extends SimpleSwingApplication {
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
-  //Code from and http://stackoverflow.com/questions/10570345/java-getaudioinputstream-symbol-not-found
+  //Code from http://stackoverflow.com/questions/10570345/java-getaudioinputstream-symbol-not-found
   //A background music can be set by adding a music.wav file in the src-folder 
   def playSound = {
     try {
