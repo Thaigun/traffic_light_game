@@ -4,7 +4,6 @@ import mapLogic._
 import java.awt.image.ImageObserver
 import java.awt.Font
 import trafficLogic._
-import scala.collection.mutable.Buffer
 import scala.swing._
 import java.awt.Color
 import scala.swing.Dialog._
@@ -14,8 +13,8 @@ import scala.swing.event._
 class GamePanel(game: Game) extends Panel with ImageObserver {
   this.requestFocusInWindow
   this.preferredSize = new Dimension(game.size._1, game.size._2)
-  val roads: Array[RoadGraph] = game.roads.map(_.graphic)
-  val crossings: Array[CrossingGraph] = game.crossings.map(_.graphic)
+  val roads: Vector[RoadGraph] = game.roads.map(_.graphic)
+  val crossings: Vector[CrossingGraph] = game.crossings.map(_.graphic)
   val cl: Array[CrossingLane] = game.crossings.foldLeft(Array[CrossingLane]())((array, crossing) => array ++ crossing.lanes)
   val crossingLanes = cl.map(_.graphic)
   val buttons = game.buttons

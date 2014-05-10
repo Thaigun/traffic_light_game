@@ -196,8 +196,8 @@ class Crossing(val id: String, val location: Point2D.Double, combinations: Array
   val sides = Vector(sideR, sideD, sideL, sideU)
   def addRoadIn(road: Road) = sides.foreach(_.tryAddIn(road))
   def addRoadOut(road: Road) = sides.foreach(_.tryAddOut(road))
-  def roadsIn: Array[Road] = sides.foldLeft(Array[Road]())((array, side) => array ++ side.roadI)
-  def roadsOut: Array[Road] = sides.foldLeft(Array[Road]())((array, side) => array ++ side.roadO)
+  def roadsIn: Vector[Road] = sides.foldLeft(Vector[Road]())((vect, side) => vect ++ side.roadI)
+  def roadsOut: Vector[Road] = sides.foldLeft(Vector[Road]())((vect, side) => vect ++ side.roadO)
   val lanes = Buffer[CrossingLane]()
   lazy val graphic = new CrossingGraph(this)
 

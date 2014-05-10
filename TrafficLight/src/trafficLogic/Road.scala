@@ -145,7 +145,8 @@ class Road(val id: String, val numOfLanes: Int)(startX: Int, startY: Int)(privat
    */
   def raffleNextRoad: Option[Road] = {
     if (this.hasNextRoad) return this.nextRoad
-    val allOut = this.nextCrossing.getOrElse(return None).roadsOut.diff(Array(this))
+    if (this.endsToEdge) return None
+    val allOut = this.nextCrossing.getOrElse(return None).roadsOut.diff(Vector(this))
     val possible = allOut.filter(r => nextCrossing.get.lanes.exists((lane: CrossingLane) => lane.in.getRoad == this && lane.out.getRoad == r))
     Some(Constants.getRoadWeighted(possible))
   }

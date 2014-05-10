@@ -51,8 +51,8 @@ class Car(game: Game, firstGoal: NavGoal) {
     def operate(acc: AccelVector, secs: Double): SpeedVector = {
       val dVx = acc.acceleration * secs * cos(acc.direction)
       val dVy = acc.acceleration * secs * sin(acc.direction)
-      val plusDirection = atan2(dVy, dVx)
-      this + new SpeedVector(sqrt(dVx * dVx + dVy * dVy), plusDirection)
+      val targetDir = atan2(dVy, dVx)
+      this + new SpeedVector(sqrt(dVx * dVx + dVy * dVy), targetDir)
     }
     override def toString() = "velocity: " + velocity + "\n, direction: " + direction
   }
@@ -177,13 +177,6 @@ class Car(game: Game, firstGoal: NavGoal) {
       findNextLeg
     }
 
-    if (this.currentLane.get != this.targetLane.get) {
-      this.navGoal.kind = NavGoal.laneSwitch
-      this.navGoal.position = targetLane.get.pointAtDistance(min(location.distance(currentLane.get.startM) + 2 * length, road.get.length))
-      this.currentLane = this.targetLane
-      if (this.nextCrossing.isDefined) nextCrossingLane = nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
-    }
-
     if (hasArrived) return
 
     val sec = time / 10E8
@@ -191,7 +184,7 @@ class Car(game: Game, firstGoal: NavGoal) {
 
     if (game.otherCarIn(scope, Some(this)).isDefined) {
       val space = game.spaceIn(this) + length / 2 // + length/2 because the steering takes in account the distance from the middle of the car
-      if (space - Constants.preferredGap - length / 2 < 1) {
+      if (space - length / 2 - Constants.preferredGap < 1) {
         return
       }
       val tempLegDir = Constants.angle(location, nextLeg)
@@ -321,15 +314,17 @@ class Car(game: Game, firstGoal: NavGoal) {
       }
     }
 
-    def handleStart = {
-      val road = this.nextRoad.get
+    def handleStart: Unit = {
+      if (!passedPoint(nextLeg)) return
+
+      val newRoad = this.nextRoad.get
       val lane = if (this.hasCurrentCross) this.currentCrossingLane.get.out else this.currentLane.get.nextLane.get
       // A point a little before the lanes end, this makes the steering behavior more realistic and prevents from collisions in crossings
       val goalPoint = lane.navEndPoint
-      val newGoal = NavGoal(goalPoint, road)
-      if (road.endsToEdge) newGoal.kind = NavGoal.goal
-      else if (road.hasNextCross) newGoal.kind = NavGoal.redLights
-      else if (road.hasNextRoad) newGoal.kind = NavGoal.roadEnd
+      val newGoal = NavGoal(goalPoint, newRoad)
+      if (newRoad.endsToEdge) newGoal.kind = NavGoal.goal
+      else if (newRoad.hasNextCross) newGoal.kind = NavGoal.redLights
+      else if (newRoad.hasNextRoad) newGoal.kind = NavGoal.roadEnd
 
       this.navGoal = newGoal
 
@@ -337,8 +332,9 @@ class Car(game: Game, firstGoal: NavGoal) {
       this.currentLane = Some(lane)
       this.nextRoad = this.road.get.raffleNextRoad
 
-      if (road.hasNextCross) {
+      if (newRoad.hasNextCross) {
         this.nextCrossingLane = this.nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
+        checkLaneSwitch
       } else {
         this.nextCrossingLane = None
       }
@@ -367,7 +363,18 @@ class Car(game: Game, firstGoal: NavGoal) {
       case NavGoal.laneSwitch => handleSwitch
     }
   }
-  
+
+  def checkLaneSwitch = {
+    if (this.hasCurrentLane && this.targetLane.isDefined) {
+      if (this.currentLane.get != this.targetLane.get) {
+        this.navGoal.kind = NavGoal.laneSwitch
+        this.navGoal.position = targetLane.get.pointAtDistance(min(location.distance(currentLane.get.startM) + 2 * length, this.road.get.length))
+        this.currentLane = this.targetLane
+        if (this.nextCrossing.isDefined) nextCrossingLane = nextCrossing.get.laneFromTo(this.currentLane.get, this.nextRoad.get)
+      }
+    }
+  }
+
 }
 object Car extends Enumeration {
   type Steering = Value

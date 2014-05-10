@@ -26,7 +26,7 @@ object Constants {
      colors(new Random().nextInt(colors.size - 1))
    }
    
-   def getRoadWeighted(roads: Array[Road]) = {
+   def getRoadWeighted(roads: Vector[Road]) = {
      val totalSum = roads.map(_.weight).sum
      val rand = new scala.util.Random()
      val hit = rand.nextInt(totalSum)

@@ -149,8 +149,8 @@ class FileReader(game: Game) {
     game.crossings.find(_.id == id).getOrElse(throw new Exception("Something went wrong when finding the crossing " + id + " for a Road."))
   }
 
-  private def buildCrossings(arr: Array[Crossing]) = {
-    for (cross <- arr) {
+  private def buildCrossings(vec: Vector[Crossing]) = {
+    for (cross <- vec) {
       cross.build
     }
   }

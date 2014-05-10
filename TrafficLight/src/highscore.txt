@@ -1,9 +1,6 @@
 #HighScores#
 # Number of cars # Time # Player ##
 
-30, 67.216, Antti
-30, 62.365, Antti
-30, 68.307, Antti
 50, 104.968, Antti
 50, 78.57, Antti
 50, 82.654, Antti
@@ -15,3 +12,4 @@
 50, 88.159, Antti
 50, 95.49, Antti
 50, 83.493, Antti
+50, 86.661, Antti

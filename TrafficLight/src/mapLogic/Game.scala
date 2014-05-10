@@ -14,10 +14,10 @@ class Game extends Runnable {
 
   var panel: GamePanel = null // Will be initialized in readFile
   
-  var roads: Array[Road] = Array()
+  var roads: Vector[Road] = Vector()
   var cars: Buffer[Car] = Buffer()
-  var crossings: Array[Crossing] = Array()
-  var buttons: Array[CrossingButton] = Array()
+  var crossings: Vector[Crossing] = Vector()
+  var buttons: Vector[CrossingButton] = Vector()
   var size: (Int, Int) = (0, 0)
 
   /*
@@ -37,15 +37,15 @@ class Game extends Runnable {
   def setSize(measures: (Int, Int)) = { size = measures }
 
   def setRoads(roadArr: Array[Road]) = {
-    this.roads = roadArr
+    this.roads = roadArr.toVector
   }
 
   def setCrossings(crossingArr: Array[Crossing]) = {
-    this.crossings = crossingArr
+    this.crossings = crossingArr.toVector
   }
 
   def addThumbnails(thu: Array[CrossingButton]) = {
-    this.buttons = thu
+    this.buttons = thu.toVector
   }
 
   def createCar = {
@@ -72,8 +72,8 @@ class Game extends Runnable {
       val nextcrossinglane = whichRoad.nextCrossing.get.laneFromTo(car.targetLane.get, next.get)
       car.nextCrossingLane = nextcrossinglane
     }
-    
     car.navGoal.position = lane.navEndPoint
+    car.checkLaneSwitch
 
     cars += car
 
